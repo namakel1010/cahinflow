@@ -5,6 +5,8 @@ let websiteInitialized = false;
 const app = {};
 let currentTheme = 'cool';
 let isMusicSectionActive = false;
+let contents = [];
+let lastChapterIndexVal = -1;
 
 let beatAnimationId = null;
 let feTurbulence, feDisplacementMap;
@@ -50,7 +52,32 @@ function applyTheme(themeName) {
     svgGradientStops.forEach((stop, index) => {
         stop.style.stopColor = stops[index];
     });
+
     if (websiteInitialized) {
+        // About text definitions
+        const coolAbout = [
+            `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ChainFlow——<br>DAO発のキャラクタープロジェクト「クリプトニンジャ」から誕生し、<br>プロデューサー namakel の手で磨き上げられた、<br>AI時代のバーチャルミュージシャン。</p>`,
+            `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ビートで鼓動を打つDJ : コンガ、<br>艶やかな息遣いで夜を染めるVocal : 蛇ノ目、<br>深みと余韻を刻むRap : 岩爺——<br>三つの音が交わる瞬間、<br>都市は揺れ、光が解き放たれる。</p>`,
+            `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">変幻する歌声、AIが紡ぐアレンジとメロディ。<br>その重なりが描く未来を、あなたも目撃してほしい。</p>`
+        ];
+        const cuteAbout = [
+            `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ChainFlow——<br>「クリプトニンジャ」プロジェクトを起点とし、<br>プロデューサーnamakelと共に<br>世界へドキドキを届けるAIミュージックユニット</p>`,
+            `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">DJ・コンガが刻む、わくわくさせるビート。<br>Vocal・蛇ノ目が放つ、キラキラと夢色の歌声。<br>Rap・岩爺が紡ぐ、心に寄り添うリリック。<br>三つの音が重なる瞬間、世界はよりカラフルに色づいていく。</p>`,
+            `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">AIの魔法によって、万華鏡のように変化する歌声とメロディ。<br>幕を開けたばかりの未来を、共に楽しもう。</p>`
+        ];
+
+        if (themeName === 'cute') {
+            contents[1] = cuteAbout[0];
+            contents[2] = cuteAbout[1];
+            contents[3] = cuteAbout[2];
+        } else { // cool
+            contents[1] = coolAbout[0];
+            contents[2] = coolAbout[1];
+            contents[3] = coolAbout[2];
+        }
+        
+        lastChapterIndexVal = -1; // Force content refresh
+        
         app.createLayers();
         app.updateOnScroll(window.scrollY);
     }
@@ -349,7 +376,7 @@ function initializeWebsite() {
         }
     }
 
-    const contents = [
+    contents = [
         `<div class="title-wrapper"><h2 class="section-title">ABOUT</h2></div>`,
         `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ChainFlow——<br>DAO発のキャラクタープロジェクト「クリプトニンジャ」から誕生し、<br>プロデューサー namakel の手で磨き上げられた、<br>AI時代のバーチャルミュージシャン。</p>`,
         `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ビートで鼓動を打つDJ : コンガ、<br>艶やかな息遣いで夜を染めるVocal : 蛇ノ目、<br>深みと余韻を刻むRap : 岩爺——<br>三つの音が交わる瞬間、<br>都市は揺れ、光が解き放たれる。</p>`,
@@ -386,7 +413,7 @@ function initializeWebsite() {
 
     const sectionStartIndexes = [0, 5, 7, contents.length];
 
-    let lastChapterIndexVal = -1;
+    lastChapterIndexVal = -1;
     let ticking = false;
     let mouse = { x: 0, y: 0 };
 

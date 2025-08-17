@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="cool">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immersive Artist Reveal with Theme Switcher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;500&family=Marcellus&family=Noto+Sans+JP:wght@300;400;700&family=Cormorant+Garamond:wght@300;400&family=Zen+Old+Mincho:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            <linearGradient id="primary-gradient-svg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" class="grad-stop-1" />
+                <stop offset="25%" class="grad-stop-2" />
+                <stop offset="50%" class="grad-stop-3" />
+                <stop offset="75%" class="grad-stop-4" />
+                <stop offset="100%" class="grad-stop-5" />
+            </linearGradient>
+            <filter id="beat-noise-filter">
+                <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch" result="noise"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="B"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <header class="header">
+        <a href="#" class="header-logo primary-gradient-text">ChainFlow</a>
+        <div class="header-right-controls">
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="theme-checkbox">
+                    <input type="checkbox" id="theme-checkbox" />
+                    <div class="slider round">
+                        <span class="icon cool-icon">💎</span>
+                        <span class="icon cute-icon">💖</span>
+                    </div>
+                </label>
+            </div>
+            <div class="menu-container">
+                <span class="menu-text primary-gradient-text">MENU</span>
+                <button class="hamburger-menu">
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="menu-overlay" class="fixed inset-0 z-[1000] flex items-center justify-center">
+        <button id="close-menu-btn" class="absolute top-5 right-[5%] text-5xl font-light">×</button>
+        <nav>
+            <ul class="flex flex-col items-center gap-8 text-center" id="menu-list">
+                <li><a href="#about" class="menu-link" data-chapter="0">ABOUT</a></li>
+                <li><a href="#works" class="menu-link" data-chapter="5">WORKS</a></li>
+                <li><a href="#links" class="menu-link" data-chapter="7">LINKS</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div id="loading-screen">
+        <div class="loader-content">
+            <div class="combined-loader-container">
+                <div class="loading-text">NOW LOADING<span>.</span><span>.</span><span>.</span></div>
+                <div class="cssload-loader">
+                    <div class="cssload-inner cssload-one"></div>
+                    <div class="cssload-inner cssload-two"></div>
+                    <div class="cssload-inner cssload-three"></div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="loading-percentage" id="loading-percentage">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="interstitial-screen">
+        <div class="interstitial-content">
+            <p id="text-en" class="interstitial-text-en"></p>
+            <p id="text-jp" class="interstitial-text-jp"></p>
+            <button id="skip-button">
+                <span>PLAY</span>
+                <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M8 5v14l11-7z"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <canvas id="particle-canvas"></canvas>
+    <div id="music-notes-container"></div>
+    <div id="zoom-container"></div>
+    
+    <div id="text-display-area">
+        <div id="text-content"></div>
+    </div>
+    
+    <main id="scroll-container" class="relative z-10"></main>
+
+    <div id="page-indicator">
+        <span id="current-page" class="current-page primary-gradient-text">01</span>
+        <span id="total-pages" class="total-pages">/ 10</span>
+    </div>
+    
+    <button id="scroll-button">
+        <div id="scroll-button-icon"></div>
+    </button>
+
+    <div id="bottom-fade"></div>
+
+    <div id="ending-curtain">
+        <div class="ending-logo primary-gradient-text">ChainFlow</div>
+        <div class="ending-message">Thank you for watching</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

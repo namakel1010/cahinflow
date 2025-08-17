@@ -8,6 +8,17 @@ let isMusicSectionActive = false;
 let contents = [];
 let lastChapterIndexVal = -1;
 
+const coolAbout = [
+    `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ChainFlow——<br>DAO発のキャラクタープロジェクト「クリプトニンジャ」から誕生し、<br>プロデューサー namakel の手で磨き上げられた、<br>AI時代のバーチャルミュージシャン。</p>`,
+    `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ビートで鼓動を打つDJ : コンガ、<br>艶やかな息遣いで夜を染めるVocal : 蛇ノ目、<br>深みと余韻を刻むRap : 岩爺——<br>三つの音が交わる瞬間、<br>都市は揺れ、光が解き放たれる。</p>`,
+    `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">変幻する歌声、AIが紡ぐアレンジとメロディ。<br>その重なりが描く未来を、あなたも目撃してほしい。</p>`
+];
+const cuteAbout = [
+    `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ChainFlow——<br>「クリプトニンジャ」プロジェクトを起点とし、<br>プロデューサーnamakelと共に<br>世界へドキドキを届けるAIミュージックユニット</p>`,
+    `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">DJ・コンガが刻む、わくわくさせるビート。<br>Vocal・蛇ノ目が放つ、キラキラと夢色の歌声。<br>Rap・岩爺が紡ぐ、心に寄り添うリリック。<br>三つの音が重なる瞬間、世界はよりカラフルに色づいていく。</p>`,
+    `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">AIの魔法によって、万華鏡のように変化する歌声とメロディ。<br>幕を開けたばかりの未来を、共に楽しもう。</p>`
+];
+
 let beatAnimationId = null;
 let feTurbulence, feDisplacementMap;
 
@@ -52,18 +63,6 @@ function applyTheme(themeName) {
     svgGradientStops.forEach((stop, index) => {
         stop.style.stopColor = stops[index];
     });
-
-    // About text definitions
-    const coolAbout = [
-        `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ChainFlow——<br>DAO発のキャラクタープロジェクト「クリプトニンジャ」から誕生し、<br>プロデューサー namakel の手で磨き上げられた、<br>AI時代のバーチャルミュージシャン。</p>`,
-        `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ビートで鼓動を打つDJ : コンガ、<br>艶やかな息遣いで夜を染めるVocal : 蛇ノ目、<br>深みと余韻を刻むRap : 岩爺——<br>三つの音が交わる瞬間、<br>都市は揺れ、光が解き放たれる。</p>`,
-        `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">変幻する歌声、AIが紡ぐアレンジとメロディ。<br>その重なりが描く未来を、あなたも目撃してほしい。</p>`
-    ];
-    const cuteAbout = [
-        `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ChainFlow——<br>「クリプトニンジャ」プロジェクトを起点とし、<br>プロデューサーnamakelと共に<br>世界へドキドキを届けるAIミュージックユニット</p>`,
-        `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">DJ・コンガが刻む、わくわくさせるビート。<br>Vocal・蛇ノ目が放つ、キラキラと夢色の歌声。<br>Rap・岩爺が紡ぐ、心に寄り添うリリック。<br>三つの音が重なる瞬間、世界はよりカラフルに色づいていく。</p>`,
-        `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">AIの魔法によって、万華鏡のように変化する歌声とメロディ。<br>幕を開けたばかりの未来を、共に楽しもう。</p>`
-    ];
 
     if (themeName === 'cute') {
         contents[1] = cuteAbout[0];
@@ -376,11 +375,16 @@ function initializeWebsite() {
         }
     }
 
+    // Initialize contents with current theme
+    const aboutText1 = (currentTheme === 'cute') ? cuteAbout[0] : coolAbout[0];
+    const aboutText2 = (currentTheme === 'cute') ? cuteAbout[1] : coolAbout[1];
+    const aboutText3 = (currentTheme === 'cute') ? cuteAbout[2] : coolAbout[2];
+
     contents = [
         `<div class="title-wrapper"><h2 class="section-title">ABOUT</h2></div>`,
-        `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ChainFlow——<br>DAO発のキャラクタープロジェクト「クリプトニンジャ」から誕生し、<br>プロデューサー namakel の手で磨き上げられた、<br>AI時代のバーチャルミュージシャン。</p>`,
-        `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ビートで鼓動を打つDJ : コンガ、<br>艶やかな息遣いで夜を染めるVocal : 蛇ノ目、<br>深みと余韻を刻むRap : 岩爺——<br>三つの音が交わる瞬間、<br>都市は揺れ、光が解き放たれる。</p>`,
-        `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">変幻する歌声、AIが紡ぐアレンジとメロディ。<br>その重なりが描く未来を、あなたも目撃してほしい。</p>`,
+        aboutText1,
+        aboutText2,
+        aboutText3,
         `<div class="flex flex-col items-center justify-center"><img src="https://placehold.co/400x600/0B0D10/F3F1EC?text=ARTIST" alt="Artist Photo" class="rounded-lg shadow-2xl shadow-amethyst/20" style="border: 2px solid; border-image-slice: 1; max-height: 60vh;" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x600/0B0D10/F3F1EC?text=Error';"><h3 class="mt-6 primary-gradient-text" style="font-family: 'Marcellus', serif; font-size: 1.75rem; letter-spacing: 0.1em;">ChainFlow</h3></div>`,
         `<div class="title-wrapper"><h2 class="section-title">WORKS</h2></div>`,
         `<div class="music-player"><div class="track-info"><img src="https://placehold.co/100x100/1a1a2e/e0e0e0?text=Sakuya" alt="Album Art" class="album-art" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/100x100/1a1a2e/e0e0e0?text=Error';"><div><h3 class="title">Sakuya - 咲耶</h3><p class="artist">トップ曲</p><button class="follow-btn">フォローする</button></div></div><div class="controls"><span class="preview-tag">プレビュー</span><div class="flex items-center gap-4"><button class="control-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg></button><div class="play-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div><button class="control-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg></button></div></div><ul class="tracklist"><li class="track-item"><div class="track-details"><div class="relative w-5 h-5 flex items-center justify-center"><span class="track-number">1</span><svg class="track-play-icon absolute w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></div><div><div class="track-title">カタツムリの燐光に導かれた...</div><div class="track-artist">Sakuya - 咲耶</div></div></div><span class="track-duration">03:19</span></li><li class="track-item"><div class="track-details"><div class="relative w-5 h-5 flex items-center justify-center"><span class="track-number">2</span><svg class="track-play-icon absolute w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></div><div><div class="track-title">死の舞踏</div><div class="track-artist">Sakuya - 咲耶</div></div></div><span class="track-duration">03:18</span></li><li class="track-item"><div class="track-details"><div class="relative w-5 h-5 flex items-center justify-center"><span class="track-number">3</span><svg class="track-play-icon absolute w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></div><div><div class="track-title">動植綵絵</div><div class="track-artist">Sakuya - 咲耶</div></div></div><span class="track-duration">03:07</span></li><li class="track-item"><div class="track-details"><div class="relative w-5 h-5 flex items-center justify-center"><span class="track-number">4</span><svg class="track-play-icon absolute w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></div><div><div class="track-title">記憶の固執</div><div class="track-artist">Sakuya - 咲耶</div></div></div><span class="track-duration">03:55</span></li></ul><div class="cta-banner"><div class="icon">♫</div><p>全楽曲をフルで聴きたい方は</p><button class="cta-button">Sunoで無料配信中</button></div></div>`,
@@ -437,7 +441,6 @@ function initializeWebsite() {
         });
 
         // [MODIFIED] Use a more robust chapter index calculation for display and logic
-        const currentChapterIndex = Math.floor(scrollY / chapterHeight);
         const visualChapterIndex = Math.floor(scrollY / chapterHeight);
         
         currentPageEl.textContent = String(Math.min(contents.length + 1, visualChapterIndex + 1)).padStart(2, '0');

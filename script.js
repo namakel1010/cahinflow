@@ -7,6 +7,27 @@ let currentTheme = 'cool';
 let isMusicSectionActive = false;
 let contents = [];
 let lastChapterIndexVal = -1;
+let musicPlayerInitialized = false;
+let persistentPlayerDismissed = false;
+
+const coolPlaylist = [
+    { title: 'chainflow', artist: 'ChainFlow', file: 'works-cool/chainflow.wav' },
+    { title: 'Fragments of…', artist: 'ChainFlow', file: 'works-cool/Fragments of….wav' },
+    { title: 'respiro vitae', artist: 'ChainFlow', file: 'works-cool/respiro vitae.wav' },
+    { title: 'still', artist: 'ChainFlow', file: 'works-cool/still.wav' },
+    { title: 'what if', artist: 'ChainFlow', file: 'works-cool/what if.wav' }
+];
+
+const cutePlaylist = [
+    { title: 'Bittersweet Times', artist: 'ChainFlow', file: 'works-cute/Bittersweet Times.wav' },
+    { title: 'BUGしてる', artist: 'ChainFlow', file: 'works-cute/BUGしてる.wav' },
+    { title: 'Inspect Before …', artist: 'ChainFlow', file: 'works-cute/Inspect Before … .wav' },
+    { title: 'Rhythm Eclipse', artist: 'ChainFlow', file: 'works-cute/Rhythm Eclipse.wav' },
+    { title: 'Show me', artist: 'ChainFlow', file: 'works-cute/Show me.wav' },
+    { title: 'Sync Now', artist: 'ChainFlow', file: 'works-cute/Sync Now.wav' },
+    { title: 'ピエタの残響', artist: 'ChainFlow', file: 'works-cute/ピエタの残響.wav' }
+];
+
 
 const coolAbout = [
     `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">ChainFlow——<br>DAO発のキャラクタープロジェクト「クリプトニンジャ」から誕生し、<br>プロデューサー namakel の手で磨き上げられた、<br>AI時代のバーチャルミュージシャン。</p>`,
@@ -18,6 +39,28 @@ const cuteAbout = [
     `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">DJ・コンガが刻む、わくわくさせるビート。<br>Vocal・蛇ノ目が放つ、キラキラと夢色の歌声。<br>Rap・岩爺が紡ぐ、心に寄り添うリリック。<br>三つの音が重なる瞬間、世界はよりカラフルに色づいていく。</p>`,
     `<p class="text-base md:text-lg leading-relaxed" style="font-family: var(--font-family-jp);">AIの魔法によって、万華鏡のように変化する歌声とメロディ。<br>幕を開けたばかりの未来を、共に楽しもう。</p>`
 ];
+
+const coolMedia = {
+    artist: 'chainflow/artist1.jpg',
+    media: [
+        'chainflow/media1.jpg',
+        'chainflow/media2.jpg',
+        'chainflow/media3.jpg',
+        'chainflow/media4.jpg',
+        'chainflow/media5.jpg'
+    ]
+};
+
+const cuteMedia = {
+    artist: 'chainflow/artist2.jpg',
+    media: [
+        'chainflow/media6.jpg',
+        'chainflow/media7.jpg',
+        'chainflow/media8.jpg',
+        'chainflow/media9.jpg',
+        'chainflow/media10.jpg'
+    ]
+};
 
 let beatAnimationId = null;
 let feTurbulence, feDisplacementMap;
@@ -38,7 +81,8 @@ const themeConfig = {
     }
 };
 
-const themeToggle = document.getElementById('theme-checkbox');
+// Segmented toggle instead of switch/text
+const themeSegment = document.getElementById('theme-segment');
 const svgGradientStops = document.querySelectorAll('#primary-gradient-svg stop');
 
 function createRipple(event, nextTheme) {
@@ -53,6 +97,39 @@ function createRipple(event, nextTheme) {
     ripple.style.backgroundColor = themeConfig[nextTheme].accentColor;
     document.body.appendChild(ripple);
     setTimeout(() => ripple.remove(), 800);
+}
+
+function showThemeMorph(nextTheme) {
+    try {
+        const container = document.getElementById('theme-morph');
+        if (!container) return;
+        container.innerHTML = '';
+        const makeIcon = (isHeart) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'morph-icon';
+            wrap.innerHTML = isHeart
+                ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5 5 0 0 0-7.1 0L12 6.3l-1.7-1.7a5 5 0 1 0-7.1 7.1l1.7 1.7L12 21l7.1-7.6 1.7-1.7a5 5 0 0 0 0-7.1z"/></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4-4h10l4 4-9 14-9-14z"/><path d="M3 7h18"/><path d="M7 7l5 14"/><path d="M17 7l-5 14"/></svg>';
+            return wrap;
+        };
+        const isToCute = nextTheme === 'cute';
+        const outIcon = makeIcon(currentTheme === 'cute');
+        const inIcon = makeIcon(isToCute);
+        outIcon.classList.add('out');
+        inIcon.classList.add('in');
+        container.appendChild(outIcon);
+        container.appendChild(inIcon);
+        container.classList.add('show');
+        // trigger transition
+        requestAnimationFrame(() => {
+            container.classList.add('animate');
+        });
+        setTimeout(() => {
+            container.classList.remove('animate');
+            container.classList.remove('show');
+            container.innerHTML = '';
+        }, 340);
+    } catch (e) { /* noop */ }
 }
 
 function applyTheme(themeName) {
@@ -73,8 +150,15 @@ function applyTheme(themeName) {
         contents[2] = coolAbout[1];
         contents[3] = coolAbout[2];
     }
+
+    const artistImgSrc = (themeName === 'cute') ? cuteMedia.artist : coolMedia.artist;
+    contents[4] = `<div class="flex flex-col items-center justify-center"><img src="${artistImgSrc}" alt="Artist Photo" class="rounded-lg shadow-2xl shadow-amethyst/20" style="border: 2px solid; border-image-slice: 1; max-height: 60vh;" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x600/0B0D10/F3F1EC?text=Error';"><h3 class="mt-6 primary-gradient-text" style="font-family: 'Marcellus', serif; font-size: 1.75rem; letter-spacing: 0.1em;">ChainFlow</h3></div>`;
     
+    const playlist = (themeName === 'cute') ? cutePlaylist : coolPlaylist;
+    contents[6] = createMusicPlayerHTML(playlist);
+
     lastChapterIndexVal = -1; // Force content refresh
+    musicPlayerInitialized = false; // Reset music player initialization flag when theme changes
     
     if (websiteInitialized) {
         app.createLayers();
@@ -82,14 +166,15 @@ function applyTheme(themeName) {
     }
 }
 
-document.querySelector('.theme-switch').addEventListener('click', (e) => {
-    const nextTheme = !themeToggle.checked ? 'cute' : 'cool';
-    createRipple(e, nextTheme);
-});
-
-themeToggle.addEventListener('change', () => {
-    applyTheme(themeToggle.checked ? 'cute' : 'cool');
-});
+function updateThemeSegmentActive() {
+    if (!themeSegment) return;
+    const items = themeSegment.querySelectorAll('.seg-item');
+    items.forEach(btn => {
+        const isActive = btn.dataset.theme === currentTheme;
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        btn.setAttribute('tabindex', isActive ? '0' : '-1');
+    });
+}
 
 // ==============================================
 // 初期化 & ローディング
@@ -113,49 +198,120 @@ function typeWriter(element, text, speed) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme') || 'cool';
-    themeToggle.checked = savedTheme === 'cute';
     applyTheme(savedTheme);
+    updateThemeSegmentActive();
+
+    // Persistent player dismissal preference
+    const ppEl = document.getElementById('persistent-player');
+    persistentPlayerDismissed = localStorage.getItem('playerDismissed') === '1';
+    if (ppEl && persistentPlayerDismissed) {
+        ppEl.classList.add('dismissed');
+        ppEl.classList.remove('visible');
+    }
+
+    // Restore player button in header
+    const restoreBtn = document.getElementById('restore-player-btn');
+    if (restoreBtn) {
+        // Show only if player is dismissed
+        restoreBtn.style.display = persistentPlayerDismissed ? 'grid' : 'none';
+
+        restoreBtn.addEventListener('click', () => {
+            const p = document.getElementById('persistent-player');
+            if (!p) return;
+            p.classList.remove('dismissed');
+            p.classList.add('visible');
+            localStorage.removeItem('playerDismissed');
+            persistentPlayerDismissed = false;
+            restoreBtn.style.display = 'none';
+        });
+    }
+
+    // One-time theme helper tip
+    // One-time mini guide for segmented toggle
+    const segTip = document.getElementById('theme-seg-tip');
+    const segTipShown = localStorage.getItem('themeSegTipShown') === '1';
+    if (segTip && !segTipShown) {
+        segTip.classList.add('show');
+        const hideSegTip = () => {
+            segTip.classList.remove('show');
+            localStorage.setItem('themeSegTipShown', '1');
+            window.removeEventListener('scroll', hideSegTip);
+        };
+        setTimeout(hideSegTip, 6000);
+        window.addEventListener('scroll', hideSegTip, { once: true });
+        if (themeSegment) themeSegment.addEventListener('click', hideSegTip, { once: true });
+    }
 
     const loadingScreen = document.getElementById('loading-screen');
     const progressBar = document.getElementById('progress-bar');
     const percentageText = document.getElementById('loading-percentage');
-    const interstitialScreen = document.getElementById('interstitial-screen');
-    const skipButton = document.getElementById('skip-button');
     
     let progress = 0;
+    // Fake a quick loading animation
     const interval = setInterval(() => {
-        progress++;
+        progress += 4; // Speed up the loading
+        if (progress > 100) progress = 100;
         progressBar.style.width = `${progress}%`;
         percentageText.textContent = `${progress}%`;
+        
         if (progress >= 100) {
             clearInterval(interval);
-            setTimeout(async () => {
+            setTimeout(() => {
                 loadingScreen.classList.add('hidden');
-                interstitialScreen.classList.add('visible');
-                
-                const textEn = document.getElementById('text-en');
-                const textJp = document.getElementById('text-jp');
-                await typeWriter(textEn, "Link the beat, let it flow.", 80);
-                await typeWriter(textJp, "つなげたビートは…もう止まらない。", 120);
-
-                setTimeout(() => {
-                    document.querySelectorAll('#text-en span, #text-jp span').forEach((span, index) => {
-                        setTimeout(() => span.classList.add('gold-reveal'), index * 25);
-                    });
-                }, 500);
-
-            }, 500);
+                document.body.classList.add('scrollable');
+                initializeWebsite();
+            }, 500); // A brief pause after loading
         }
-    }, 30);
-
-    skipButton.addEventListener('click', () => {
-        interstitialScreen.classList.remove('visible');
-        setTimeout(() => {
-            document.body.classList.add('scrollable');
-            initializeWebsite();
-        }, 1000);
-    });
+    }, 50); // Faster interval
 });
+
+// Attach click handlers for segmented theme toggle (in global scope to work before init if needed)
+if (themeSegment) {
+    themeSegment.addEventListener('click', (e) => {
+        const target = e.target.closest('.seg-item');
+        if (!target) return;
+        const chosen = target.dataset.theme;
+        if (!chosen || chosen === currentTheme) return;
+        showThemeMorph(chosen);
+        createRipple(e, chosen);
+        applyTheme(chosen);
+        updateThemeSegmentActive();
+        try {
+            if (!window.__themeToastShownOnce) {
+                showToast((chosen === 'cute') ? 'ＣＵＴＥ テーマに切替' : 'ＣＯＯＬ テーマに切替');
+                window.__themeToastShownOnce = true;
+            }
+        } catch (err) {}
+    });
+
+    // Keyboard navigation: Left/Right to choose
+    themeSegment.addEventListener('keydown', (e) => {
+        const items = Array.from(themeSegment.querySelectorAll('.seg-item'));
+        const activeIndex = items.findIndex(b => b.getAttribute('aria-selected') === 'true');
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            e.preventDefault();
+            const nextIndex = (e.key === 'ArrowLeft') ? 0 : 1; // 0=cool, 1=cute
+            const nextTheme = items[nextIndex].dataset.theme;
+            if (nextTheme && nextTheme !== currentTheme) {
+                showThemeMorph(nextTheme);
+                applyTheme(nextTheme);
+                updateThemeSegmentActive();
+                items[nextIndex].focus();
+            }
+        } else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const focused = document.activeElement.closest('.seg-item');
+            if (focused) {
+                const t = focused.dataset.theme;
+                if (t && t !== currentTheme) {
+                    showThemeMorph(t);
+                    applyTheme(t);
+                    updateThemeSegmentActive();
+                }
+            }
+        }
+    });
+}
 
 // ==============================================
 // ビートアニメーション制御
@@ -190,19 +346,390 @@ function stopBeatAnimation() {
     }
 }
 
+// Helper: lightweight toast
+function showToast(message) {
+    try {
+        const old = document.querySelector('.toast');
+        if (old) old.remove();
+        const el = document.createElement('div');
+        el.className = 'toast';
+        el.setAttribute('role', 'status');
+        el.setAttribute('aria-live', 'polite');
+        el.textContent = message;
+        document.body.appendChild(el);
+        requestAnimationFrame(() => el.classList.add('show'));
+        setTimeout(() => {
+            el.classList.remove('show');
+            setTimeout(() => el.remove(), 300);
+        }, 2800);
+    } catch (e) { console.warn('Toast error', e); }
+}
+
+// ==============================================
+// Music Player (Refactored for Persistent Player)
+// ==============================================
+
+// Holds the core audio logic and state
+const musicEngine = {
+    audioPlayer: null,
+    currentTrackIndex: 0,
+    isPlaying: false,
+    isInitialized: false,
+    playlist: [],
+    trackItems: [], // The <li> elements from the main player
+    durations: [],  // Cached durations for each track (seconds)
+};
+
+function createMusicPlayerHTML(playlist) {
+    const limitedPlaylist = playlist.slice(0, 5);
+    musicEngine.playlist = limitedPlaylist; // Store playlist for the engine
+
+    const tracklistHTML = limitedPlaylist.map((track, index) => `
+        <li class="track-item" data-index="${index}">
+            <div class="track-details">
+                <div class="relative w-5 h-5 flex items-center justify-center">
+                    <span class="track-number">${index + 1}</span>
+                    <svg class="track-play-icon absolute w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+                </div>
+                <div>
+                    <div class="track-title">${track.title}</div>
+                    <div class="track-artist">${track.artist}</div>
+                </div>
+            </div>
+            <span class="track-duration"></span>
+        </li>
+    `).join('');
+
+    return `
+        <div class="music-player">
+            <div class="track-info">
+                <img src="https://placehold.co/120x120/1a1a2e/e0e0e0?text=Album+Art" alt="Album Art" class="album-art" loading="lazy">
+                <div>
+                    <h3 class="title">曲を選んでください</h3>
+                    <p class="artist">リストから曲を選択して再生</p>
+                    <button class="follow-btn">フォローする</button>
+                </div>
+            </div>
+            <div class="controls flex items-center justify-between">
+                 <div class="flex items-center gap-3">
+                    <span class="preview-tag">プレビュー</span>
+                    <button class="control-btn" id="prev-track">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>
+                    </button>
+                    <div class="play-btn" id="play-pause">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="play-icon"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="pause-icon" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                    </div>
+                    <button class="control-btn" id="next-track">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg>
+                    </button>
+                </div>
+                <div class="volume-control flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.75" class="volume-slider">
+                </div>
+            </div>
+            <div class="time-display flex justify-between text-xs mt-2 mb-1">
+                <span id="current-time">00:00</span>
+                <span id="total-duration">00:00</span>
+            </div>
+            <div class="progress-bar-container-player" id="progress-container">
+                <div class="progress-bar-player" id="progress-bar-player"></div>
+            </div>
+            <ul class="tracklist">${tracklistHTML}</ul>
+        </div>
+    `;
+}
+
+function initializeMusicEngine() {
+    if (musicEngine.isInitialized) return;
+
+    musicEngine.audioPlayer = document.getElementById('audio-player');
+    // Restore saved volume or default
+    const savedVol = parseFloat(localStorage.getItem('playerVolume'));
+    musicEngine.audioPlayer.volume = isNaN(savedVol) ? 0.75 : Math.min(1, Math.max(0, savedVol));
+
+    // --- Get Persistent Player Elements ---
+    const persistentPlayerPlayBtn = document.getElementById('play-pause-persistent');
+    const persistentPlayerNextBtn = document.getElementById('next-track-persistent');
+    const persistentPlayerPrevBtn = document.getElementById('prev-track-persistent');
+    const persistentVolumeSlider = document.getElementById('volume-slider-persistent');
+    const persistentProgressContainer = document.getElementById('progress-container-persistent');
+    const dismissPersistentBtn = document.getElementById('dismiss-player-btn');
+
+    if (dismissPersistentBtn) {
+        dismissPersistentBtn.addEventListener('click', () => {
+            const pp = document.getElementById('persistent-player');
+            if (pp) {
+                pp.classList.remove('visible');
+                pp.classList.add('dismissed');
+                localStorage.setItem('playerDismissed', '1');
+                persistentPlayerDismissed = true;
+                // Reveal restore button and pulse
+                const rbtn = document.getElementById('restore-player-btn');
+                if (rbtn) {
+                    rbtn.style.display = 'grid';
+                    rbtn.classList.remove('pulse-once');
+                    // force reflow to retrigger
+                    void rbtn.offsetWidth;
+                    rbtn.classList.add('pulse-once');
+                }
+                // Show a brief toast tip
+                showToast('プレイヤーを閉じました。右上のボタンから再表示できます');
+            }
+        });
+    }
+
+    // --- Core Audio Logic ---
+    const playTrack = () => {
+        // Ensure persistent player is shown even if previously dismissed
+        const pp = document.getElementById('persistent-player');
+        if (pp) {
+            pp.classList.remove('dismissed');
+            pp.classList.add('visible');
+        }
+        try {
+            localStorage.removeItem('playerDismissed');
+            persistentPlayerDismissed = false;
+            const rbtn = document.getElementById('restore-player-btn');
+            if (rbtn) rbtn.style.display = 'none';
+        } catch (e) {}
+
+        musicEngine.audioPlayer.play().then(() => {
+            musicEngine.isPlaying = true;
+            updateAllPlayerUIs();
+            const el = document.getElementById('persistent-player');
+            if (el) el.classList.add('visible');
+            document.body.classList.add('persistent-player-visible');
+        }).catch(e => console.error("Audio play error:", e));
+    };
+
+    const pauseTrack = () => {
+        musicEngine.audioPlayer.pause();
+        musicEngine.isPlaying = false;
+        updateAllPlayerUIs();
+    };
+
+    const loadTrack = (trackIndex) => {
+        const trackData = musicEngine.playlist[trackIndex];
+        if (!trackData) return;
+
+        musicEngine.currentTrackIndex = trackIndex;
+        musicEngine.audioPlayer.src = encodeURI(trackData.file);
+        musicEngine.audioPlayer.load();
+        playTrack(); 
+    };
+
+    const nextTrack = () => {
+        const newIndex = (musicEngine.currentTrackIndex + 1) % musicEngine.playlist.length;
+        loadTrack(newIndex);
+    };
+
+    const prevTrack = () => {
+        const newIndex = (musicEngine.currentTrackIndex - 1 + musicEngine.playlist.length) % musicEngine.playlist.length;
+        loadTrack(newIndex);
+    };
+    
+    const setVolume = (volume) => {
+        const v = Math.min(1, Math.max(0, parseFloat(volume)));
+        musicEngine.audioPlayer.volume = v;
+        try { localStorage.setItem('playerVolume', String(v)); } catch (e) {}
+        updateAllPlayerUIs(); // To sync sliders
+    }
+
+    // --- Event Listeners for Audio Element ---
+    musicEngine.audioPlayer.addEventListener('timeupdate', updateAllPlayerUIs);
+    musicEngine.audioPlayer.addEventListener('loadedmetadata', updateAllPlayerUIs);
+    musicEngine.audioPlayer.addEventListener('ended', nextTrack);
+    musicEngine.audioPlayer.addEventListener('volumechange', () => {
+        try { localStorage.setItem('playerVolume', String(musicEngine.audioPlayer.volume)); } catch (e) {}
+    });
+
+    // --- Wire up Persistent Player Controls ---
+    persistentPlayerPlayBtn.addEventListener('click', () => {
+        musicEngine.isPlaying ? pauseTrack() : playTrack();
+    });
+    persistentPlayerNextBtn.addEventListener('click', nextTrack);
+    persistentPlayerPrevBtn.addEventListener('click', prevTrack);
+    if (persistentVolumeSlider) {
+        persistentVolumeSlider.value = musicEngine.audioPlayer.volume;
+        persistentVolumeSlider.addEventListener('input', (e) => {
+            setVolume(e.target.value);
+        });
+    }
+    persistentProgressContainer.addEventListener('click', (e) => {
+        const width = persistentProgressContainer.clientWidth;
+        const clickX = e.offsetX;
+        const duration = musicEngine.audioPlayer.duration;
+        if (duration) {
+            musicEngine.audioPlayer.currentTime = (clickX / width) * duration;
+        }
+    });
+
+
+    // --- Expose control methods to the global scope for other parts of the app ---
+    app.playTrack = playTrack;
+    app.pauseTrack = pauseTrack;
+    app.loadTrack = loadTrack;
+    app.nextTrack = nextTrack;
+    app.prevTrack = prevTrack;
+    app.setVolume = setVolume;
+
+    musicEngine.isInitialized = true;
+    console.log('Music Engine Initialized');
+}
+
+// Preload and display track durations in the list (without starting playback)
+function preloadTrackDurations() {
+    if (!musicEngine.playlist || musicEngine.playlist.length === 0) return;
+    musicEngine.durations = new Array(musicEngine.playlist.length).fill(null);
+    musicEngine.playlist.forEach((track, index) => {
+        try {
+            const tempAudio = new Audio();
+            tempAudio.preload = 'metadata';
+            tempAudio.src = encodeURI(track.file);
+            const onLoaded = () => {
+                const d = tempAudio.duration;
+                if (!isNaN(d)) {
+                    musicEngine.durations[index] = d;
+                    // Update UI if the element exists
+                    const item = musicEngine.trackItems[index];
+                    if (item) {
+                        const durationEl = item.querySelector('.track-duration');
+                        if (durationEl) durationEl.textContent = formatTime(d);
+                    }
+                }
+                // Clean up
+                tempAudio.removeEventListener('loadedmetadata', onLoaded);
+            };
+            tempAudio.addEventListener('loadedmetadata', onLoaded);
+        } catch (e) {
+            console.warn('Duration preload failed for', track.file, e);
+        }
+    });
+}
+
+function initializeMainPlayerUI() {
+    const musicPlayer = document.querySelector('.music-player');
+    if (!musicPlayer || musicPlayer.dataset.initialized === 'true') return;
+
+    // --- Get UI Elements ---
+    const playPauseBtn = document.getElementById('play-pause');
+    const prevBtn = document.getElementById('prev-track');
+    const nextBtn = document.getElementById('next-track');
+    const trackItems = musicPlayer.querySelectorAll('.track-item');
+    const progressContainer = document.getElementById('progress-container');
+    const volumeSlider = document.getElementById('volume-slider');
+
+    // --- Attach Event Listeners ---
+    playPauseBtn.addEventListener('click', () => {
+        musicEngine.isPlaying ? app.pauseTrack() : app.playTrack();
+    });
+    prevBtn.addEventListener('click', app.prevTrack);
+    nextBtn.addEventListener('click', app.nextTrack);
+
+    trackItems.forEach((track, index) => {
+        track.addEventListener('click', () => {
+            if (musicEngine.currentTrackIndex === index) {
+                musicEngine.isPlaying ? app.pauseTrack() : app.playTrack();
+            } else {
+                app.loadTrack(index);
+            }
+        });
+    });
+
+    progressContainer.addEventListener('click', (e) => {
+        const width = progressContainer.clientWidth;
+        const clickX = e.offsetX;
+        const duration = musicEngine.audioPlayer.duration;
+        if (duration) {
+            musicEngine.audioPlayer.currentTime = (clickX / width) * duration;
+        }
+    });
+
+    volumeSlider.addEventListener('input', (e) => {
+        app.setVolume(e.target.value); // Use the new centralized function
+    });
+    // Set initial volume
+    app.setVolume(volumeSlider.value);
+
+    musicPlayer.dataset.initialized = 'true';
+    musicEngine.trackItems = Array.from(trackItems); // Store for UI updates
+    // Preload durations for all tracks so they are visible from the start
+    preloadTrackDurations();
+    console.log('Main Player UI Initialized');
+}
+
+function formatTime(seconds) {
+    if (isNaN(seconds)) return '00:00';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+}
+
+function updateAllPlayerUIs() {
+    const { audioPlayer, isPlaying, currentTrackIndex, playlist } = musicEngine;
+    const track = playlist[currentTrackIndex];
+    if (!track) return;
+
+    const currentTime = audioPlayer.currentTime;
+    const duration = audioPlayer.duration;
+    const progressPercent = duration ? (currentTime / duration) * 100 : 0;
+    const volume = audioPlayer.volume;
+
+    // --- Update Main Player ---
+    const mainPlayer = document.querySelector('.music-player');
+    if (mainPlayer) {
+        mainPlayer.querySelector('.title').textContent = track.title;
+        mainPlayer.querySelector('.artist').textContent = track.artist;
+        mainPlayer.querySelector('.play-icon').style.display = isPlaying ? 'none' : 'block';
+        mainPlayer.querySelector('.pause-icon').style.display = isPlaying ? 'block' : 'none';
+        mainPlayer.querySelector('#current-time').textContent = formatTime(currentTime);
+        mainPlayer.querySelector('#total-duration').textContent = formatTime(duration);
+        mainPlayer.querySelector('#progress-bar-player').style.width = `${progressPercent}%`;
+        mainPlayer.querySelector('#volume-slider').value = volume;
+        
+        musicEngine.trackItems.forEach((item, index) => {
+            item.classList.toggle('active', index === currentTrackIndex);
+            const durationEl = item.querySelector('.track-duration');
+            if (index === currentTrackIndex && duration) {
+                durationEl.textContent = formatTime(duration);
+            }
+        });
+    }
+
+    // --- Update Persistent Player ---
+    const persistentPlayer = document.getElementById('persistent-player');
+    if (persistentPlayer) {
+        persistentPlayer.querySelector('.title-persistent').textContent = track.title;
+        persistentPlayer.querySelector('.artist-persistent').textContent = track.artist;
+        persistentPlayer.querySelector('.play-icon-persistent').style.display = isPlaying ? 'none' : 'block';
+        persistentPlayer.querySelector('.pause-icon-persistent').style.display = isPlaying ? 'block' : 'none';
+        persistentPlayer.querySelector('.progress-bar-persistent').style.width = `${progressPercent}%`;
+        persistentPlayer.querySelector('#current-time-persistent').textContent = formatTime(currentTime);
+        persistentPlayer.querySelector('#total-duration-persistent').textContent = formatTime(duration);
+        persistentPlayer.querySelector('#volume-slider-persistent').value = volume;
+    }
+}
+
+
+
 // ==============================================
 // メインのウェブサイト機能
 // ==============================================
 function initializeWebsite() {
     websiteInitialized = true;
+    initializeMusicEngine(); // Initialize the core audio logic once.
     
     feTurbulence = document.querySelector('#beat-noise-filter feTurbulence');
     feDisplacementMap = document.querySelector('#beat-noise-filter feDisplacementMap');
 
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const initVW = (window.visualViewport && window.visualViewport.width) ? window.visualViewport.width : window.innerWidth;
+    const initVH = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
+    canvas.width = initVW;
+    canvas.height = initVH;
     let particlesArray;
     const particleCount = 100;
 
@@ -225,14 +752,20 @@ function initializeWebsite() {
         particlesArray = [];
         for (let i = 0; i < particleCount; i++) {
             let size = (Math.random() * 1.5) + 0.5;
-            let x = Math.random() * innerWidth;
-            let y = Math.random() * innerHeight;
+            let x = Math.random() * canvas.width;
+            let y = Math.random() * canvas.height;
             let dX = (Math.random() - 0.5) * 0.2;
             let dY = (Math.random() - 0.5) * 0.2;
             particlesArray.push(new Particle(x, y, dX, dY, size));
         }
     }
-    function animateParticles() { requestAnimationFrame(animateParticles); ctx.clearRect(0, 0, innerWidth, innerHeight); particlesArray.forEach(p => p.update()); }
+    function animateParticles() {
+        requestAnimationFrame(animateParticles);
+        const vw = (window.visualViewport && window.visualViewport.width) ? window.visualViewport.width : innerWidth;
+        const vh = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : innerHeight;
+        ctx.clearRect(0, 0, vw, vh);
+        particlesArray.forEach(p => p.update());
+    }
     initParticles();
     animateParticles();
 
@@ -251,7 +784,7 @@ function initializeWebsite() {
         musicElements.forEach(item => {
             const speedMultiplier = isMusicSectionActive ? 3 : 1;
             item.speedX = item.baseSpeedX * speedMultiplier;
-            item.speedY = item.baseSpeedY * speedMultiplier;
+            item.speedY = item.speedY * speedMultiplier;
             item.el.style.opacity = isMusicSectionActive ? (currentTheme === 'cute' ? 0.4 : 0.2) : (currentTheme === 'cute' ? 0.2 : 0.1);
 
             item.x += item.speedX; item.y += item.speedY; item.rotation += item.rotationSpeed;
@@ -264,7 +797,7 @@ function initializeWebsite() {
 
     const zoomContainer = document.getElementById('zoom-container');
     let layerData = [];
-    const numLayers = 30;
+    let numLayers = 30; // adjusted per theme in createLayers
     const mediaPositions = [
         { baseX: -60, baseY: -60 }, { baseX: 20,  baseY: 40  }, { baseX: 60,  baseY: -60 },
         { baseX: -20, baseY: 0   }, { baseX: -60, baseY: 60  }, { baseX: 65,  baseY: -55 },
@@ -275,9 +808,12 @@ function initializeWebsite() {
     app.createLayers = function() {
         zoomContainer.innerHTML = '';
         layerData = [];
+        // Increase decorative shape density for CUTE theme
+        numLayers = (currentTheme === 'cute') ? 40 : 30;
         let mediaPositionIndex = 0;
         const layerTypes = Array(numLayers).fill(0);
-        const mediaCount = Math.floor(numLayers / 10); 
+        // Reduce number of illustration squares to about half
+        const mediaCount = 5; 
         for(let i = 0; i < mediaCount; i++) { layerTypes[i] = 1; }
         for (let i = layerTypes.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -293,25 +829,21 @@ function initializeWebsite() {
                 layerEl.style.width = `${size}px`;
                 layerEl.style.height = `${size}px`;
                 layerEl.style.border = '1px solid rgba(128, 128, 128, 0.2)';
-                if (mediaPositionIndex % 2 === 0) {
-                    const img = document.createElement('img');
-                    img.src = `https://placehold.co/${Math.round(size)}x${Math.round(size)}/2E3A24/F3F1EC?text=Media+${mediaPositionIndex + 1}`;
-                    img.alt = "Media content";
-                    img.loading = "lazy";
-                    img.onerror = function() { this.src = `https://placehold.co/${Math.round(size)}x${Math.round(size)}/0B0D10/F3F1EC?text=Error`; };
-                    layerEl.appendChild(img);
-                } else {
-                    const vid = document.createElement('video');
-                    vid.src = `https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`;
-                    vid.autoplay = true; vid.muted = true; vid.loop = true; vid.playsInline = true;
-                    layerEl.appendChild(vid);
-                }
+                const img = document.createElement('img');
+                const currentMedia = currentTheme === 'cool' ? coolMedia.media : cuteMedia.media;
+                img.src = currentMedia[mediaPositionIndex % currentMedia.length];
+                img.alt = "Media content";
+                img.loading = "lazy";
+                img.onerror = function() { this.src = `https://placehold.co/${Math.round(size)}x${Math.round(size)}/0B0D10/F3F1EC?text=Error`; };
+                layerEl.appendChild(img);
                 const position = mediaPositions[mediaPositionIndex % mediaPositions.length];
                 baseX = position.baseX;
                 baseY = position.baseY;
                 mediaPositionIndex++;
             } else {
-                if (Math.random() < 0.1) continue;
+                // Fewer skips on CUTE to show more frames
+                const skipProb = (currentTheme === 'cute') ? 0.02 : 0.1;
+                if (Math.random() < skipProb) continue;
 
                 const baseSize = Math.min(window.innerWidth * 0.4, 200);
                 size = (Math.random() > 0.5) ? baseSize * (1.8 + Math.random() * 0.4) : baseSize * (0.4 + Math.random() * 0.2);
@@ -379,21 +911,24 @@ function initializeWebsite() {
     const aboutText1 = (currentTheme === 'cute') ? cuteAbout[0] : coolAbout[0];
     const aboutText2 = (currentTheme === 'cute') ? cuteAbout[1] : coolAbout[1];
     const aboutText3 = (currentTheme === 'cute') ? cuteAbout[2] : coolAbout[2];
+    const artistImgSrc = (currentTheme === 'cute') ? cuteMedia.artist : coolMedia.artist;
+    const playlist = (currentTheme === 'cute') ? cutePlaylist : coolPlaylist;
 
     contents = [
         `<div class="title-wrapper"><h2 class="section-title">ABOUT</h2></div>`,
         aboutText1,
         aboutText2,
         aboutText3,
-        `<div class="flex flex-col items-center justify-center"><img src="https://placehold.co/400x600/0B0D10/F3F1EC?text=ARTIST" alt="Artist Photo" class="rounded-lg shadow-2xl shadow-amethyst/20" style="border: 2px solid; border-image-slice: 1; max-height: 60vh;" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x600/0B0D10/F3F1EC?text=Error';"><h3 class="mt-6 primary-gradient-text" style="font-family: 'Marcellus', serif; font-size: 1.75rem; letter-spacing: 0.1em;">ChainFlow</h3></div>`,
+        `<div class="flex flex-col items-center justify-center"><img src="${artistImgSrc}" alt="Artist Photo" class="rounded-lg shadow-2xl shadow-amethyst/20" style="border: 2px solid; border-image-slice: 1; max-height: 60vh;" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x600/0B0D10/F3F1EC?text=Error';"><h3 class="mt-6 primary-gradient-text" style="font-family: 'Marcellus', serif; font-size: 1.75rem; letter-spacing: 0.1em;">ChainFlow</h3></div>`,
         `<div class="title-wrapper"><h2 class="section-title">WORKS</h2></div>`,
-        `<div class="music-player"><div class="track-info"><img src="https://placehold.co/100x100/1a1a2e/e0e0e0?text=Sakuya" alt="Album Art" class="album-art" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/100x100/1a1a2e/e0e0e0?text=Error';"><div><h3 class="title">Sakuya - 咲耶</h3><p class="artist">トップ曲</p><button class="follow-btn">フォローする</button></div></div><div class="controls"><span class="preview-tag">プレビュー</span><div class="flex items-center gap-4"><button class="control-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg></button><div class="play-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div><button class="control-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg></button></div></div><ul class="tracklist"><li class="track-item"><div class="track-details"><div class="relative w-5 h-5 flex items-center justify-center"><span class="track-number">1</span><svg class="track-play-icon absolute w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></div><div><div class="track-title">カタツムリの燐光に導かれた...</div><div class="track-artist">Sakuya - 咲耶</div></div></div><span class="track-duration">03:19</span></li><li class="track-item"><div class="track-details"><div class="relative w-5 h-5 flex items-center justify-center"><span class="track-number">2</span><svg class="track-play-icon absolute w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></div><div><div class="track-title">死の舞踏</div><div class="track-artist">Sakuya - 咲耶</div></div></div><span class="track-duration">03:18</span></li><li class="track-item"><div class="track-details"><div class="relative w-5 h-5 flex items-center justify-center"><span class="track-number">3</span><svg class="track-play-icon absolute w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></div><div><div class="track-title">動植綵絵</div><div class="track-artist">Sakuya - 咲耶</div></div></div><span class="track-duration">03:07</span></li><li class="track-item"><div class="track-details"><div class="relative w-5 h-5 flex items-center justify-center"><span class="track-number">4</span><svg class="track-play-icon absolute w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></div><div><div class="track-title">記憶の固執</div><div class="track-artist">Sakuya - 咲耶</div></div></div><span class="track-duration">03:55</span></li></ul><div class="cta-banner"><div class="icon">♫</div><p>全楽曲をフルで聴きたい方は</p><button class="cta-button">Sunoで無料配信中</button></div></div>`,
+        createMusicPlayerHTML(playlist),
         `<div class="title-wrapper"><h2 class="section-title">LINKS</h2></div>`,
-        `<div class="flex justify-center"><div class="links-grid"><a href="#" class="link-button"><svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3h-6Z"/></svg><span>SUNO</span></a><a href="#" class="link-button"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm4.5 14.5c-.2.3-.6.4-.9.2c-2.2-1.3-5-1.6-8.3-0.9c-.4 0.1-.7-.2-.8-.6c-.1-.4.2-.7.6-.8c3.7-0.8 6.8-0.4 9.3 1.1c.3.2.4.6.2.9zm1.2-2.7c-.3.4-.8.5-1.1.2c-2.5-1.5-6.3-2-9.8-1.1c-.5.1-.9-.2-1-.7c-.1-.5.2-.9.7-1c4-1 8.2-0.5 11.2 1.4c.4.2.5.8.2 1.2zm.1-2.9c-3-1.8-8-2.3-11.2-1.2c-.6.2-1.2-.2-1.4-.8c-.2-.6.2-1.2.8-1.4c3.8-1.2 9.4-0.6 13 1.5c.5.3.7.9.4 1.4c-.3.5-.9.7-1.4.4z"/></svg><span>SPOTIFY</span></a><a href="#" class="link-button"><svg viewBox="0 0 24 24"><path d="M15.21 2.3a1 1 0 0 0-1.42 0l-8 8a1 1 0 0 0 0 1.41l8 8a1 1 0 0 0 1.41-1.41L8.33 12l6.88-6.88a1 1 0 0 0 0-1.41Z" transform="scale(0.8) translate(3, 2)"/><path d="M17.65 3.82A9.82 9.82 0 0 0 12 2a10 10 0 1 0 10 10a9.82 9.82 0 0 0-1.82-5.65a1 1 0 0 0-1.53.85a7.83 7.83 0 0 1 1.2 4.3A8 8 0 1 1 12 4a7.83 7.83 0 0 1 4.3 1.2a1 1 0 0 0 .85-1.53Z"/></svg><span>APPLE MUSIC</span></a><a href="#" class="link-button"><svg viewBox="0 0 24 24"><path d="M21.58 7.19A2.19 2.19 0 0 0 20 5.5H4a2.19 2.19 0 0 0-1.58 1.69A24.44 24.44 0 0 0 2 12a24.44 24.44 0 0 0 .42 4.81A2.19 2.19 0 0 0 4 18.5h16a2.19 2.19 0 0 0 1.58-1.69A24.44 24.44 0 0 0 22 12a24.44 24.44 0 0 0-.42-4.81Z"/><path d="m10 14.5l5-2.5l-5-2.5Z"/></svg><span>YOUTUBE</span></a></div></div>`
+        `<div class="flex flex-col items-center justify-center text-center"><div class="links-grid non-functional"><a href="#" class="link-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3h-6Z"/></svg><span>SUNO</span></a><a href="#" class="link-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm4.5 14.5c-.2.3-.6.4-.9.2c-2.2-1.3-5-1.6-8.3-0.9c-.4 0.1-.7-.2-.8-.6c-.1-.4.2-.7.6-.8c3.7-0.8 6.8-0.4 9.3 1.1c.3.2.4.6.2.9zm1.2-2.7c-.3.4-.8.5-1.1.2c-2.5-1.5-6.3-2-9.8-1.1c-.5.1-.9-.2-1-.7c-.1-.5.2-.9.7-1c4-1 8.2-0.5 11.2 1.4c.4.2.5.8.2 1.2zm.1-2.9c-3-1.8-8-2.3-11.2-1.2c-.6.2-1.2-.2-1.4-.8c-.2-.6.2-1.2.8-1.4c3.8-1.2 9.4-0.6 13 1.5c.5.3.7.9.4 1.4c-.3.5-.9.7-1.4.4z"/></svg><span>SPOTIFY</span></a><a href="#" class="link-button"><svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" width="42" height="42"><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282"/><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282"/></svg><span>APPLE MUSIC</span></a><a href="#" class="link-button"><svg viewBox="0 0 1024 721" aria-hidden="true" fill="currentColor" width="42" height="42"><path d="M1007.9,285.1c-11-40.6-42.8-72.2-83.4-83.2C844,178.4,512,178.4,512,178.4s-332,0-412.5,23.5 c-40.6,11-72.4,42.6-83.4,83.2C2.6,365.6,2.6,512,2.6,512s0,146.4,13.5,226.9c11,40.6,42.8,72.2,83.4,83.2 C180,845.6,512,845.6,512,845.6s332,0,412.5-23.5c40.6-11,72.4-42.6,83.4-83.2C1021.4,658.4,1021.4,512,1021.4,512 S1021.4,365.6,1007.9,285.1z M409.6,604.4V311.4L678.4,458L409.6,604.4z"/></svg><span>YOUTUBE</span></a></div><p class="mt-8 text-lg opacity-70">Coming Soon...</p></div>`
     ];
 
     const scrollContainer = document.getElementById('scroll-container');
     const textContent = document.getElementById('text-content');
+    const textDisplayArea = document.getElementById('text-display-area');
     const currentPageEl = document.getElementById('current-page');
     const totalPagesEl = document.getElementById('total-pages');
     const bottomFade = document.getElementById('bottom-fade');
@@ -402,7 +937,8 @@ function initializeWebsite() {
     const menuButton = document.querySelector('.menu-container');
     const menuOverlay = document.getElementById('menu-overlay');
     const closeMenuBtn = document.getElementById('close-menu-btn');
-    const menuLinks = document.querySelectorAll('.menu-link');
+    const menuLinks = Array.from(document.querySelectorAll('.menu-link')); // Use Array.from for easier manipulation
+    let lastFocusedElement; // For accessibility
     
     const scrollButton = document.getElementById('scroll-button');
     const scrollButtonIcon = document.getElementById('scroll-button-icon');
@@ -410,8 +946,12 @@ function initializeWebsite() {
     const upArrowSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
     
     totalPagesEl.textContent = `/ ${String(contents.length + 1).padStart(2, '0')}`;
-    
-    const chapterHeight = window.innerHeight * 1.5;
+
+    // Viewport helpers to stabilize mobile URL bar behavior
+    const getViewportHeight = () => (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
+    const getViewportWidth = () => (window.visualViewport && window.visualViewport.width) ? window.visualViewport.width : window.innerWidth;
+
+    let chapterHeight = getViewportHeight() * 1.5;
     scrollContainer.style.height = `${chapterHeight * (contents.length + 1.5)}px`;
     document.body.style.height = scrollContainer.style.height;
 
@@ -422,39 +962,103 @@ function initializeWebsite() {
     let mouse = { x: 0, y: 0 };
 
     app.updateOnScroll = function(scrollY) {
-        layerData.forEach(item => {
+        const visualChapterIndex = Math.floor(scrollY / chapterHeight);
+        const progressInChapter = (scrollY % chapterHeight) / chapterHeight;
+
+        // Calculate text opacity and scale first
+        let textOpacity = 0, textScale = 0.5;
+        if (visualChapterIndex < contents.length) {
+            // Fade in: 10% -> 30%
+            if (progressInChapter > 0.1 && progressInChapter <= 0.3) {
+                const t = (progressInChapter - 0.1) / 0.2;
+                textOpacity = t;
+                textScale = 0.5 + t * 0.5;
+            } 
+            // Fully visible: 30% -> 70%
+            else if (progressInChapter > 0.3 && progressInChapter <= 0.7) {
+                textOpacity = 1;
+                textScale = 1.0;
+            } 
+            // Fade out: 70% -> 90%
+            else if (progressInChapter > 0.7 && progressInChapter < 0.9) {
+                const t = (progressInChapter - 0.7) / 0.2;
+                textOpacity = 1 - t;
+                textScale = 1.0 + t * 2.0;
+            }
+        }
+        textOpacity = Math.max(0, Math.min(1, textOpacity));
+        textScale = Math.max(0, textScale);
+
+        // Update layers (background elements)
+        // Pass 1: compute layout/opacity metrics and find the closest image layer
+        const metrics = [];
+        let closestImageIdx = -1;
+        let closestImageZ = Infinity;
+        layerData.forEach((item, idx) => {
             const { el, depth, baseX, baseY, rotationSpeedX, rotationSpeedY } = item;
             const totalDepth = numLayers * 100;
             let adjustedDepth = (depth - scrollY) % totalDepth;
             if (adjustedDepth < 0) adjustedDepth += totalDepth;
+
             const relativeZ = adjustedDepth;
             const scale = 1 / (relativeZ * 0.005 + 1);
-            const opacity = Math.max(0, 1 - (relativeZ / (numLayers * 50)));
-            const parallaxX = mouse.x * (depth / 100);
-            const parallaxY = mouse.y * (depth / 100);
-            const x = baseX * scale; 
-            const y = baseY * scale;
-            const rotX = scrollY * rotationSpeedX * 0.1; 
-            const rotY = scrollY * rotationSpeedY * 0.1;
-            el.style.transform = `translateX(calc(-50% + ${parallaxX}px)) translateY(calc(-50% + ${parallaxY}px)) translate3d(${x}vw, ${y}vh, 0) scale(${scale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-            el.style.opacity = opacity;
+            let layerOpacity = Math.max(0, 1 - (relativeZ / (numLayers * 50)));
+            const isImageLayer = !!el.querySelector('img');
+            if (isImageLayer && textOpacity > 0.1) {
+                layerOpacity = layerOpacity * (1 - textOpacity * 0.9);
+            }
+            metrics[idx] = { el, depth, baseX, baseY, rotationSpeedX, rotationSpeedY, relativeZ, scale, layerOpacity, isImageLayer };
+
+            if (isImageLayer && relativeZ < closestImageZ) {
+                closestImageZ = relativeZ;
+                closestImageIdx = idx;
+            }
         });
 
-        // [MODIFIED] Use a more robust chapter index calculation for display and logic
-        const visualChapterIndex = Math.floor(scrollY / chapterHeight);
-        
+        // Pass 2: apply transforms/opacities; in cute theme, keep only the closest image visible
+        metrics.forEach((m, idx) => {
+            const { el, depth, baseX, baseY, rotationSpeedX, rotationSpeedY, relativeZ, scale } = m;
+            let { layerOpacity, isImageLayer } = m;
+
+            if (currentTheme === 'cute' && isImageLayer && idx !== closestImageIdx) {
+                layerOpacity = 0; // ensure at most one image visible at a time
+            }
+
+            const parallaxX = mouse.x * (depth / 100);
+            const parallaxY = mouse.y * (depth / 100);
+            const x = baseX * scale;
+            const y = baseY * scale;
+            const rotX = scrollY * rotationSpeedX * 0.1;
+            const rotY = scrollY * rotationSpeedY * 0.1;
+
+            el.style.transform = `translateX(calc(-50% + ${parallaxX}px)) translateY(calc(-50% + ${parallaxY}px)) translate3d(${x}vw, ${y}vh, 0) scale(${scale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+            el.style.opacity = layerOpacity;
+        });
+
+        // Update page indicator and other UI elements
         currentPageEl.textContent = String(Math.min(contents.length + 1, visualChapterIndex + 1)).padStart(2, '0');
         
-        isMusicSectionActive = (visualChapterIndex === 6);
+        const isNowMusicSection = (visualChapterIndex === 6);
+        isMusicSectionActive = isNowMusicSection;
+        // Toggle stronger background muting when the music player is visible
+        document.body.classList.toggle('music-mode', isNowMusicSection);
+        // Enable pointer events only on the music section so controls are clickable
+        if (textDisplayArea) {
+            textDisplayArea.style.pointerEvents = isNowMusicSection ? 'auto' : 'none';
+        }
+        // Music section: show the player all at once (no gradual fade/scale)
+        if (isNowMusicSection) {
+            textOpacity = 1;
+            textScale = 1.35; // fixed size for clarity
+        }
 
         const isEffectivelyLastPage = visualChapterIndex >= contents.length;
         scrollButtonIcon.innerHTML = isEffectivelyLastPage ? upArrowSVG : downArrowSVG;
         scrollButton.classList.add('visible');
-        
         bottomFade.classList.toggle('visible', visualChapterIndex === contents.length - 1);
-        
+
+        // Handle ending curtain
         const endThreshold = contents.length * chapterHeight;
-        
         const isEndingVisible = scrollY >= endThreshold - window.innerHeight / 2;
         if (isEndingVisible) {
             if (!endingCurtain.classList.contains('visible')) {
@@ -468,6 +1072,7 @@ function initializeWebsite() {
             }
         }
 
+        // Update text content
         if (visualChapterIndex >= contents.length) {
             textContent.style.opacity = '0';
             textContent.style.transform = 'scale(0.9)';
@@ -481,30 +1086,46 @@ function initializeWebsite() {
                 artistImg.classList.add('primary-gradient-border');
             }
             lastChapterIndexVal = visualChapterIndex;
+
+            // When the music section is scrolled into view, initialize its UI
+            if (visualChapterIndex === 6) {
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        initializeMainPlayerUI();
+                    }, 50);
+                });
+            }
+
+            // Links section microinteraction fallback (dim siblings and scale icons/text)
+            const linksGrid = textContent.querySelector('.links-grid');
+            if (linksGrid) {
+                const buttons = Array.from(linksGrid.querySelectorAll('.link-button'));
+                const setHover = (btn) => {
+                    linksGrid.classList.add('hovering');
+                    buttons.forEach(b => b.classList.toggle('is-hovered', b === btn));
+                };
+                const clearHover = () => {
+                    linksGrid.classList.remove('hovering');
+                    buttons.forEach(b => b.classList.remove('is-hovered'));
+                };
+                linksGrid.addEventListener('mouseover', (e) => {
+                    const btn = e.target.closest('.link-button');
+                    if (btn) setHover(btn);
+                });
+                linksGrid.addEventListener('focusin', (e) => {
+                    const btn = e.target.closest('.link-button');
+                    if (btn) setHover(btn);
+                });
+                linksGrid.addEventListener('mouseleave', clearHover);
+                linksGrid.addEventListener('focusout', (e) => {
+                    // If focus moves outside the grid, clear
+                    if (!linksGrid.contains(document.activeElement)) clearHover();
+                });
+            }
         }
 
-        // [MODIFIED] Animation logic with dead zones to prevent content overlap
-        const progressInChapter = (scrollY % chapterHeight) / chapterHeight;
-        let opacity = 0, scale = 0.5;
-
-        if (progressInChapter > 0.1 && progressInChapter <= 0.5) {
-            // Phase 1: Fade in and scale from 0.5x to 1.0x
-            const t = (progressInChapter - 0.1) / 0.4; // t goes from 0 to 1
-            opacity = t;
-            scale = 0.5 + t * 0.5;
-        } else if (progressInChapter > 0.5 && progressInChapter < 0.9) {
-            // Phase 2: Scale from 1.0x to 3.0x and fade out
-            const t = (progressInChapter - 0.5) / 0.4; // t goes from 0 to 1
-            opacity = 1 - t;
-            scale = 1.0 + t * 2.0;
-        }
-
-        // Clamp values
-        opacity = Math.max(0, Math.min(1, opacity));
-        scale = Math.max(0, scale);
-
-        textContent.style.opacity = opacity;
-        textContent.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        textContent.style.opacity = textOpacity;
+        textContent.style.transform = `translate(-50%, -50%) scale(${textScale})`;
         textContent.style.transformOrigin = 'center center';
     }
     
@@ -520,20 +1141,60 @@ function initializeWebsite() {
         }
     }
 
-    menuButton.addEventListener('click', () => { menuOverlay.classList.add('visible'); document.body.classList.add('menu-open'); });
-    closeMenuBtn.addEventListener('click', () => { menuOverlay.classList.remove('visible'); document.body.classList.remove('menu-open'); });
+    function openMenu() {
+        lastFocusedElement = document.activeElement;
+        menuOverlay.classList.add('visible');
+        document.body.classList.add('menu-open');
+        // Focus the first link in the menu after transition
+        setTimeout(() => menuLinks[0] && menuLinks[0].focus(), 100);
+    }
+
+    function closeMenu() {
+        menuOverlay.classList.remove('visible');
+        document.body.classList.remove('menu-open');
+        // Return focus to the element that opened the menu
+        if (lastFocusedElement) {
+            lastFocusedElement.focus();
+        }
+    }
+
+    menuButton.addEventListener('click', openMenu);
+    closeMenuBtn.addEventListener('click', closeMenu);
+
     menuLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const chapterIndex = parseInt(e.target.dataset.chapter, 10);
-            // [MODIFIED] Scroll to the middle of the chapter for peak visibility
             const targetScroll = chapterIndex * chapterHeight + (chapterHeight / 2);
             window.scrollTo({ top: targetScroll, behavior: 'smooth' });
-            setTimeout(() => {
-                menuOverlay.classList.remove('visible');
-                document.body.classList.remove('menu-open');
-            }, 400);
+            setTimeout(closeMenu, 400);
         });
+    });
+
+    // Add keyboard accessibility to the menu (focus trapping and Escape to close)
+    menuOverlay.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeMenu();
+            return;
+        }
+
+        if (e.key === 'Tab') {
+            const focusableElements = [closeMenuBtn, ...menuLinks];
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (e.shiftKey) { // Shift + Tab
+                if (document.activeElement === firstElement) {
+                    lastElement.focus();
+                    e.preventDefault();
+                }
+            } else { // Tab
+                if (document.activeElement === lastElement) {
+                    firstElement.focus();
+                    e.preventDefault();
+                }
+            }
+        }
     });
 
     // [MODIFIED] Updated scroll button logic to jump to sections accurately
@@ -568,24 +1229,65 @@ function initializeWebsite() {
     });
 
     window.addEventListener('mousemove', (event) => {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        mouse.x = (event.clientX / getViewportWidth()) * 2 - 1;
+        mouse.y = -(event.clientY / getViewportHeight()) * 2 + 1;
     });
+    window.addEventListener('touchmove', (event) => {
+        if (!event.touches || event.touches.length === 0) return;
+        const t = event.touches[0];
+        mouse.x = (t.clientX / getViewportWidth()) * 2 - 1;
+        mouse.y = -(t.clientY / getViewportHeight()) * 2 + 1;
+    }, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     
     let resizeTimeout;
-    window.addEventListener('resize', () => {
-        canvas.width = innerWidth; canvas.height = innerHeight;
+    function updateLayoutDimensions() {
+        const vw = getViewportWidth();
+        const vh = getViewportHeight();
+        canvas.width = vw; canvas.height = vh;
         initParticles();
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
+            chapterHeight = vh * 1.5;
             app.createLayers();
-            document.body.style.height = `${chapterHeight * (contents.length + 1.5)}px`;
-            scrollContainer.style.height = document.body.style.height;
+            const totalH = chapterHeight * (contents.length + 1.5);
+            document.body.style.height = `${totalH}px`;
+            scrollContainer.style.height = `${totalH}px`;
             app.updateOnScroll(window.scrollY);
-        }, 500);
-    });
+        }, 250);
+    }
+    window.addEventListener('resize', updateLayoutDimensions);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', updateLayoutDimensions);
+    }
 
     app.createLayers();
     app.updateOnScroll(window.scrollY);
+
+    // Show theme onboarding on first visit
+    const seen = localStorage.getItem('themeOnboardingSeen') === '1';
+    const overlay = document.getElementById('theme-onboarding');
+    if (overlay && !seen) {
+        const show = () => overlay.classList.add('show');
+        setTimeout(show, 200); // small delay after init
+
+        const close = () => {
+            overlay.classList.remove('show');
+            localStorage.setItem('themeOnboardingSeen', '1');
+        };
+        const choose = (theme) => {
+            showThemeMorph(theme);
+            applyTheme(theme);
+            updateThemeSegmentActive();
+            close();
+        };
+        const btnCool = document.getElementById('onboard-choose-cool');
+        const btnCute = document.getElementById('onboard-choose-cute');
+        const btnSkip = document.getElementById('onboard-skip');
+        if (btnCool) btnCool.addEventListener('click', () => choose('cool'));
+        if (btnCute) btnCute.addEventListener('click', () => choose('cute'));
+        if (btnSkip) btnSkip.addEventListener('click', close);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); }, { once: true });
+    }
 }

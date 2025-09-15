@@ -10,6 +10,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;500&family=Marcellus&family=Noto+Sans+JP:wght@300;400;700&family=Cormorant+Garamond:wght@300;400&family=Zen+Old+Mincho:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="chainflow/fabicon.jpg">
+
+    <!-- SEO / OGP -->
+    <meta name="description" content="ChainFlowは、変幻するボーカルと疾走するビートで、クールな熱とキュートな輝きを同時に鳴らすAIミュージックユニット。">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:site_name" content="ChainFlow">
+    <meta property="og:title" content="ChainFlow">
+    <meta property="og:description" content="ChainFlowは、変幻するボーカルと疾走するビートで、クールな熱とキュートな輝きを同時に鳴らすAIミュージックユニット。">
+    <!-- Update to absolute URL on production (set to root-relative for local preview) -->
+    <meta property="og:url" content="/">
+    <meta property="og:image" content="/assets/ogp/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ChainFlow">
+    <meta name="twitter:description" content="ChainFlowは、変幻するボーカルと疾走するビートで、クールな熱とキュートな輝きを同時に鳴らすAIミュージックユニット。">
+    <meta name="twitter:image" content="/assets/ogp/og-image.jpg">
 </head>
 <body>
     <svg width="0" height="0" style="position:absolute">
@@ -31,15 +52,33 @@
     <header class="header">
         <a href="#" class="header-logo primary-gradient-text">ChainFlow</a>
         <div class="header-right-controls">
-            <div class="theme-switch-wrapper">
-                <label class="theme-switch" for="theme-checkbox">
-                    <input type="checkbox" id="theme-checkbox" />
-                    <div class="slider round">
-                        <span class="icon cool-icon">💎</span>
-                        <span class="icon cute-icon">💖</span>
-                    </div>
-                </label>
+            <!-- Player icon (left of theme segment), shown only when dismissed -->
+            <button id="restore-player-btn" class="header-icon-btn" aria-label="プレイヤーを表示" title="プレイヤー表示" style="display:none">
+                <!-- Cool: Play icon -->
+                <svg class="icon-restore-cool" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <!-- Cute: Musical note icon -->
+                <svg class="icon-restore-cute" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18V5l12-2v9"/>
+                    <circle cx="6" cy="18" r="3"/>
+                    <circle cx="18" cy="16" r="3"/>
+                </svg>
+            </button>
+            
+            <!-- Segmented theme toggle -->
+            <div id="theme-segment" class="theme-segment" role="tablist" aria-label="テーマ切替">
+                <button class="seg-item" role="tab" aria-selected="true" data-theme="cool" tabindex="0">
+                    <svg class="seg-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l4-4h10l4 4-9 14-9-14z"/><path d="M3 7h18"/><path d="M7 7l5 14"/><path d="M17 7l-5 14"/></svg>
+                    <span class="seg-label">ＣＯＯＬ</span>
+                </button>
+                <span class="seg-divider">|</span>
+                <button class="seg-item" role="tab" aria-selected="false" data-theme="cute" tabindex="-1">
+                    <svg class="seg-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5 5 0 0 0-7.1 0L12 6.3l-1.7-1.7a5 5 0 1 0-7.1 7.1l1.7 1.7L12 21l7.1-7.6 1.7-1.7a5 5 0 0 0 0-7.1z"/></svg>
+                    <span class="seg-label">ＣＵＴＥ</span>
+                </button>
             </div>
+            <div id="theme-seg-tip" class="seg-tip" aria-hidden="true">ここでテーマを切替</div>
             <div class="menu-container">
                 <span class="menu-text primary-gradient-text">MENU</span>
                 <button class="hamburger-menu">
@@ -62,6 +101,54 @@
         </nav>
     </div>
 
+    <!-- Theme Onboarding (first visit only) -->
+    <div id="theme-onboarding" class="onboarding-overlay" aria-hidden="true">
+        <div class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+            <div class="onboarding-title" id="onboarding-title">テーマを選択</div>
+            <p class="onboarding-desc">はじめに表示テーマを選べます。後からいつでも切り替え可能です。</p>
+            <div class="preview-grid">
+                <div class="preview-card preview-cool">
+                    <div class="preview-title">ＣＯＯＬ</div>
+                    <div class="preview-sample">Aa あア｜タイポと配色のプレビュー</div>
+                    <div class="chip-row">
+                        <span class="chip" style="background:#0B0D10"></span>
+                        <span class="chip" style="background:#F3F1EC"></span>
+                        <span class="chip" style="background:#6D4BAE"></span>
+                        <span class="chip" style="background:#BF953F"></span>
+                    </div>
+                </div>
+                <div class="preview-card preview-cute">
+                    <div class="preview-title">ＣＵＴＥ</div>
+                    <div class="preview-sample">Aa あア｜タイポと配色のプレビュー</div>
+                    <div class="chip-row">
+                        <span class="chip" style="background:#FEF9F9"></span>
+                        <span class="chip" style="background:#5E3A3A"></span>
+                        <span class="chip" style="background:#D56D7A"></span>
+                        <span class="chip" style="background:#B883A1"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="onboarding-actions">
+                <button id="onboard-choose-cool" class="onboard-btn onboard-cool">
+                    <svg class="onboard-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 7l4-4h10l4 4-9 14-9-14z"/>
+                        <path d="M3 7h18"/>
+                        <path d="M7 7l5 14"/>
+                        <path d="M17 7l-5 14"/>
+                    </svg>
+                    ＣＯＯＬ
+                </button>
+                <button id="onboard-choose-cute" class="onboard-btn onboard-cute">
+                    <svg class="onboard-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20.8 4.6a5 5 0 0 0-7.1 0L12 6.3l-1.7-1.7a5 5 0 1 0-7.1 7.1l1.7 1.7L12 21l7.1-7.6 1.7-1.7a5 5 0 0 0 0-7.1z"/>
+                    </svg>
+                    ＣＵＴＥ
+                </button>
+            </div>
+            <button id="onboard-skip" class="onboard-skip">あとで</button>
+        </div>
+    </div>
+
     <div id="loading-screen">
         <div class="loader-content">
             <div class="combined-loader-container">
@@ -81,18 +168,10 @@
         </div>
     </div>
 
-    <div id="interstitial-screen">
-        <div class="interstitial-content">
-            <p id="text-en" class="interstitial-text-en"></p>
-            <p id="text-jp" class="interstitial-text-jp"></p>
-            <button id="skip-button">
-                <span>PLAY</span>
-                <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M8 5v14l11-7z"></path></svg>
-            </button>
-        </div>
-    </div>
-
+    
+    
     <canvas id="particle-canvas"></canvas>
+    <div id="theme-morph" class="theme-morph" aria-hidden="true"></div>
     <div id="music-notes-container"></div>
     <div id="zoom-container"></div>
     
@@ -118,6 +197,48 @@
         <div class="ending-message">Thank you for watching</div>
     </div>
 
+    <div id="persistent-player" class="persistent-player">
+        <button id="dismiss-player-btn" class="dismiss-player-btn" aria-label="プレイヤーを閉じる" title="閉じる">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+            </svg>
+        </button>
+        <div class="persistent-player-content">
+            <img src="https://placehold.co/60x60/1a1a2e/e0e0e0?text=Art" alt="Album Art" class="album-art-persistent">
+            <div class="track-info-persistent">
+                <h4 class="title-persistent">No Music Playing</h4>
+                <p class="artist-persistent"></p>
+            </div>
+            <div class="controls-persistent-main">
+                <button class="control-btn-persistent" id="prev-track-persistent">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>
+                </button>
+                <div class="play-btn-persistent" id="play-pause-persistent">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="play-icon-persistent"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="pause-icon-persistent" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                </div>
+                <button class="control-btn-persistent" id="next-track-persistent">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg>
+                </button>
+            </div>
+            <div class="time-and-volume-persistent">
+                <div class="time-display-persistent">
+                    <span id="current-time-persistent">00:00</span>
+                    <span>/</span>
+                    <span id="total-duration-persistent">00:00</span>
+                </div>
+                <div class="volume-control-persistent">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    <input type="range" id="volume-slider-persistent" min="0" max="1" step="0.01" value="0.75" class="volume-slider">
+                </div>
+            </div>
+        </div>
+        <div id="progress-container-persistent" class="progress-bar-container-persistent">
+            <div class="progress-bar-persistent"></div>
+        </div>
+    </div>
+    <audio id="audio-player" style="display:none;"></audio>
     <script src="script.js"></script>
 </body>
 </html>

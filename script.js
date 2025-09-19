@@ -72,7 +72,7 @@ const externalLinks = [
         label: 'SUNO',
         url: 'https://suno.com/@namakel',
         embedUrl: 'https://suno.com/embed/@namakel',
-        svg: `<svg viewBox="0 0 24 24" aria-hidden="true" width="42" height="42" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v9"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`
+        svg: `<svg viewBox="0 0 24 24" aria-hidden="true" width="42" height="42" fill="currentColor"><text x="12" y="18" text-anchor="middle" font-size="18" font-family="'Noto Sans JP', 'Poppins', sans-serif">♪</text></svg>`
     },
     {
         label: 'SPOTIFY',

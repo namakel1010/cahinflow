@@ -173,6 +173,7 @@ function applyTheme(themeName) {
         musicEngine.currentTrackIndex = hasTracks ? 0 : -1;
         musicEngine.trackItems = [];
         musicEngine.durations = [];
+        musicEngine.loadedTrackFile = null;
     }
 
     updateAlbumArtDisplays(DEFAULT_ALBUM_ART);
@@ -419,6 +420,7 @@ const musicEngine = {
     durations: [],  // Cached durations for each track (seconds)
     metadataCache: new Map(),
     metadataPromises: new Map(),
+    loadedTrackFile: null,
 };
 
 function createMusicPlayerHTML(playlist) {
@@ -649,35 +651,48 @@ function initializeMusicEngine() {
 
     // --- Core Audio Logic ---
     const playTrack = () => {
-        if (musicEngine.audioPlayer && !(musicEngine.audioPlayer.currentSrc || musicEngine.audioPlayer.src)) {
-            if (musicEngine.playlist.length > 0) {
-                const fallbackIndex = (typeof musicEngine.currentTrackIndex === 'number' && musicEngine.currentTrackIndex >= 0)
-                    ? musicEngine.currentTrackIndex
-                    : 0;
-                loadTrack(fallbackIndex);
-            }
+        if (!musicEngine.audioPlayer || musicEngine.playlist.length === 0) return;
+
+        const currentTrack = musicEngine.playlist[musicEngine.currentTrackIndex];
+        if (!currentTrack) return;
+
+        if (musicEngine.loadedTrackFile !== currentTrack.file) {
+            loadTrack(musicEngine.currentTrackIndex);
             return;
         }
-        // Ensure persistent player is shown even if previously dismissed
-        const pp = document.getElementById('persistent-player');
-        if (pp) {
-            pp.classList.remove('dismissed');
-            pp.classList.add('visible');
-        }
-        try {
-            localStorage.removeItem('playerDismissed');
-            persistentPlayerDismissed = false;
-            const rbtn = document.getElementById('restore-player-btn');
-            if (rbtn) rbtn.style.display = 'none';
-        } catch (e) {}
 
-        musicEngine.audioPlayer.play().then(() => {
-            musicEngine.isPlaying = true;
-            updateAllPlayerUIs();
-            const el = document.getElementById('persistent-player');
-            if (el) el.classList.add('visible');
-            document.body.classList.add('persistent-player-visible');
-        }).catch(e => console.error("Audio play error:", e));
+        const needsSource = !(musicEngine.audioPlayer.currentSrc || musicEngine.audioPlayer.src);
+        if (needsSource) {
+            const fallbackIndex = (typeof musicEngine.currentTrackIndex === 'number' && musicEngine.currentTrackIndex >= 0)
+                ? musicEngine.currentTrackIndex
+                : 0;
+            loadTrack(fallbackIndex);
+            return;
+        }
+
+        const startPlayback = () => {
+            const pp = document.getElementById('persistent-player');
+            if (pp) {
+                pp.classList.remove('dismissed');
+                pp.classList.add('visible');
+            }
+            try {
+                localStorage.removeItem('playerDismissed');
+                persistentPlayerDismissed = false;
+                const rbtn = document.getElementById('restore-player-btn');
+                if (rbtn) rbtn.style.display = 'none';
+            } catch (e) {}
+
+            musicEngine.audioPlayer.play().then(() => {
+                musicEngine.isPlaying = true;
+                updateAllPlayerUIs();
+                const el = document.getElementById('persistent-player');
+                if (el) el.classList.add('visible');
+                document.body.classList.add('persistent-player-visible');
+            }).catch(e => console.error("Audio play error:", e));
+        };
+
+        startPlayback();
     };
 
     const pauseTrack = () => {
@@ -694,6 +709,7 @@ function initializeMusicEngine() {
         updateAlbumArtDisplays(resolveAlbumArt(trackData));
         musicEngine.audioPlayer.src = encodeURI(trackData.file);
         musicEngine.audioPlayer.load();
+        musicEngine.loadedTrackFile = trackData.file;
         ensureTrackMetadata(trackIndex)
             .then((meta) => {
                 if (!meta) return;

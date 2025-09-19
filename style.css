@@ -578,6 +578,7 @@ body.music-mode .music-player {
 .music-player .follow-btn { background: transparent; border: 1px solid var(--text-secondary); color: var(--text-secondary); border-radius: 50px; padding: 4px 12px; font-size: 0.7rem; cursor: pointer; transition: all 0.3s; margin-top: 8px; }
 .music-player .follow-btn:hover { background: var(--text-primary); color: var(--text-on-accent); }
 .music-player .controls {
+    --volume-control-width: clamp(128px, 20vw, 220px);
     position: relative;
     display: flex;
     align-items: center;
@@ -585,11 +586,20 @@ body.music-mode .music-player {
     width: 100%;
     padding: 0 16px;
     margin-top: 16px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.music-player .controls::before {
+    content: '';
+    flex: 1 1 var(--volume-control-width);
+    pointer-events: none;
 }
 .music-player .main-control-group {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 16px;
+    flex-shrink: 0;
 }
 .music-player .play-btn { width: 48px; height: 48px; background: var(--text-primary); border-radius: 50%; display: grid; place-items: center; cursor: pointer; transition: transform 0.2s; }
 .music-player .play-btn:hover { transform: scale(1.15); }
@@ -971,12 +981,13 @@ body.scrollable #page-indicator { opacity: 1; }
 }
 /* Volume Slider Styles */
 .volume-control {
-    position: absolute;
-    right: 16px;
-    width: 120px;
+    position: relative;
+    right: auto;
+    width: var(--volume-control-width);
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .music-player .volume-control svg {
@@ -1015,6 +1026,22 @@ body.scrollable #page-indicator { opacity: 1; }
     background: var(--text-primary);
     cursor: pointer;
     border-radius: 50%;
+}
+
+@media (max-width: 520px) {
+    .music-player .controls {
+        gap: 12px;
+    }
+
+    .music-player .controls::before {
+        flex-basis: 100%;
+        height: 0;
+    }
+
+    .music-player .volume-control {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 [data-theme="cute"] .volume-slider {

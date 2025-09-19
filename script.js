@@ -10,22 +10,27 @@ let lastChapterIndexVal = -1;
 let musicPlayerInitialized = false;
 let persistentPlayerDismissed = false;
 
+const DEFAULT_ALBUM_ART = 'https://placehold.co/120x120/1a1a2e/e0e0e0?text=Album+Art';
+const DEFAULT_ALBUM_ART_PERSISTENT = 'https://placehold.co/60x60/1a1a2e/e0e0e0?text=Art';
+
 const coolPlaylist = [
-    { title: 'chainflow', artist: 'ChainFlow', file: 'works-cool/chainflow.wav' },
-    { title: 'Fragments of…', artist: 'ChainFlow', file: 'works-cool/Fragments of….wav' },
-    { title: 'respiro vitae', artist: 'ChainFlow', file: 'works-cool/respiro vitae.wav' },
-    { title: 'still', artist: 'ChainFlow', file: 'works-cool/still.wav' },
-    { title: 'what if', artist: 'ChainFlow', file: 'works-cool/what if.wav' }
+    { title: 'BlueMoon', artist: 'ChainFlow', file: 'works-cool/BlueMoon.mp3' },
+    { title: 'ChainFlow', artist: 'ChainFlow', file: 'works-cool/ChainFlow.mp3' },
+    { title: 'Fragments of…', artist: 'ChainFlow', file: 'works-cool/Fragments of….mp3' },
+    { title: 'Inspect Before …', artist: 'ChainFlow', file: 'works-cool/Inspect Before … .mp3' },
+    { title: 'Lilith’s Shadow', artist: 'ChainFlow', file: 'works-cool/Lilith’s Shadow .mp3' },
+    { title: 'still', artist: 'ChainFlow', file: 'works-cool/still.mp3' },
+    { title: 'Sync Now', artist: 'ChainFlow', file: 'works-cool/Sync Now.mp3' },
+    { title: 'what if', artist: 'ChainFlow', file: 'works-cool/what if.mp3' }
 ];
 
 const cutePlaylist = [
-    { title: 'Bittersweet Times', artist: 'ChainFlow', file: 'works-cute/Bittersweet Times.wav' },
-    { title: 'BUGしてる', artist: 'ChainFlow', file: 'works-cute/BUGしてる.wav' },
-    { title: 'Inspect Before …', artist: 'ChainFlow', file: 'works-cute/Inspect Before … .wav' },
-    { title: 'Rhythm Eclipse', artist: 'ChainFlow', file: 'works-cute/Rhythm Eclipse.wav' },
-    { title: 'Show me', artist: 'ChainFlow', file: 'works-cute/Show me.wav' },
-    { title: 'Sync Now', artist: 'ChainFlow', file: 'works-cute/Sync Now.wav' },
-    { title: 'ピエタの残響', artist: 'ChainFlow', file: 'works-cute/ピエタの残響.wav' }
+    { title: 'alt account', artist: 'ChainFlow', file: 'works-cute/alt account .mp3' },
+    { title: 'Bittersweet Times', artist: 'ChainFlow', file: 'works-cute/Bittersweet Times.mp3' },
+    { title: 'BUGしてる', artist: 'ChainFlow', file: 'works-cute/BUGしてる.mp3' },
+    { title: 'Rhythm Eclipse', artist: 'ChainFlow', file: 'works-cute/Rhythm Eclipse.mp3' },
+    { title: 'Show me', artist: 'ChainFlow', file: 'works-cute/Show me.mp3' },
+    { title: 'ピエタの残響', artist: 'ChainFlow', file: 'works-cute/ピエタの残響.mp3' }
 ];
 
 
@@ -378,13 +383,15 @@ const musicEngine = {
     playlist: [],
     trackItems: [], // The <li> elements from the main player
     durations: [],  // Cached durations for each track (seconds)
+    metadataCache: new Map(),
+    metadataPromises: new Map(),
 };
 
 function createMusicPlayerHTML(playlist) {
-    const limitedPlaylist = playlist.slice(0, 5);
-    musicEngine.playlist = limitedPlaylist; // Store playlist for the engine
+    const workingPlaylist = playlist.map(track => ({ ...track }));
+    musicEngine.playlist = workingPlaylist; // Store playlist for the engine
 
-    const tracklistHTML = limitedPlaylist.map((track, index) => `
+    const tracklistHTML = workingPlaylist.map((track, index) => `
         <li class="track-item" data-index="${index}">
             <div class="track-details">
                 <div class="relative w-5 h-5 flex items-center justify-center">
@@ -403,7 +410,7 @@ function createMusicPlayerHTML(playlist) {
     return `
         <div class="music-player">
             <div class="track-info">
-                <img src="https://placehold.co/120x120/1a1a2e/e0e0e0?text=Album+Art" alt="Album Art" class="album-art" loading="lazy">
+                <img src="${DEFAULT_ALBUM_ART}" alt="Album Art" class="album-art" loading="lazy">
                 <div>
                     <h3 class="title">曲を選んでください</h3>
                     <p class="artist">リストから曲を選択して再生</p>
@@ -412,7 +419,7 @@ function createMusicPlayerHTML(playlist) {
             </div>
             <div class="controls flex items-center justify-between">
                  <div class="flex items-center gap-3">
-                    <span class="preview-tag">プレビュー</span>
+                    <span class="preview-tag">フルサイズ</span>
                     <button class="control-btn" id="prev-track">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>
                     </button>
@@ -441,10 +448,135 @@ function createMusicPlayerHTML(playlist) {
     `;
 }
 
+function getMetadataClient() {
+    if (typeof window !== 'undefined') {
+        const direct = window.musicMetadata;
+        if (direct && typeof direct.parseBlob === 'function') return direct;
+        const alt = window.musicMetadataBrowser;
+        if (alt && typeof alt.parseBlob === 'function') return alt;
+    }
+    if (typeof musicMetadata !== 'undefined' && typeof musicMetadata.parseBlob === 'function') {
+        return musicMetadata;
+    }
+    return null;
+}
+
+function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+    });
+}
+
+function resolveAlbumArt(track) {
+    if (!track) return DEFAULT_ALBUM_ART;
+    const cached = musicEngine.metadataCache.get(track.file);
+    if (cached && cached.artUrl) return cached.artUrl;
+    if (track.cover) return track.cover;
+    return DEFAULT_ALBUM_ART;
+}
+
+function updateAlbumArtDisplays(artUrl) {
+    const isDefault = !artUrl || artUrl === DEFAULT_ALBUM_ART;
+    const resolvedMain = isDefault ? DEFAULT_ALBUM_ART : artUrl;
+    const resolvedPersistent = isDefault ? DEFAULT_ALBUM_ART_PERSISTENT : artUrl;
+    const mainArt = document.querySelector('.music-player .album-art');
+    if (mainArt && mainArt.src !== resolvedMain) {
+        mainArt.src = resolvedMain;
+    }
+    const persistentArt = document.querySelector('#persistent-player .album-art-persistent');
+    if (persistentArt && persistentArt.src !== resolvedPersistent) {
+        persistentArt.src = resolvedPersistent;
+    }
+}
+
+async function ensureTrackMetadata(trackIndex) {
+    const trackData = musicEngine.playlist[trackIndex];
+    if (!trackData || !trackData.file) return null;
+
+    const cached = musicEngine.metadataCache.get(trackData.file);
+    if (cached) return cached;
+
+    if (musicEngine.metadataPromises.has(trackData.file)) {
+        return musicEngine.metadataPromises.get(trackData.file);
+    }
+
+    const metadataClient = getMetadataClient();
+    if (!metadataClient) {
+        const fallback = { artUrl: trackData.cover || '', duration: null };
+        musicEngine.metadataCache.set(trackData.file, fallback);
+        return fallback;
+    }
+
+    const promise = (async () => {
+        try {
+            const resourceUrl = encodeURI(trackData.file);
+            const response = await fetch(resourceUrl);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch ${trackData.file}: ${response.status}`);
+            }
+            const blob = await response.blob();
+            const metadata = await metadataClient.parseBlob(blob);
+            const picture = (metadata && metadata.common && Array.isArray(metadata.common.picture))
+                ? metadata.common.picture[0]
+                : null;
+            let artUrl = trackData.cover || '';
+            if (picture && picture.data) {
+                const artBlob = new Blob([picture.data], { type: picture.format || 'image/jpeg' });
+                artUrl = await blobToDataUrl(artBlob);
+            }
+            const duration = metadata && metadata.format ? metadata.format.duration || null : null;
+            const result = { artUrl, duration };
+            musicEngine.metadataCache.set(trackData.file, result);
+            return result;
+        } catch (error) {
+            console.warn('Metadata extraction failed for', trackData.file, error);
+            const fallback = { artUrl: trackData.cover || '', duration: null };
+            musicEngine.metadataCache.set(trackData.file, fallback);
+            return fallback;
+        } finally {
+            musicEngine.metadataPromises.delete(trackData.file);
+        }
+    })();
+
+    musicEngine.metadataPromises.set(trackData.file, promise);
+    return promise;
+}
+
+function applyDurationToUI(index, durationSeconds) {
+    if (typeof durationSeconds !== 'number' || isNaN(durationSeconds)) return;
+    musicEngine.durations[index] = durationSeconds;
+
+    const item = musicEngine.trackItems[index];
+    if (item) {
+        const durationEl = item.querySelector('.track-duration');
+        if (durationEl) durationEl.textContent = formatTime(durationSeconds);
+    }
+
+    if (musicEngine.currentTrackIndex === index) {
+        const formatted = formatTime(durationSeconds);
+        const mainPlayer = document.querySelector('.music-player');
+        if (mainPlayer) {
+            const totalEl = mainPlayer.querySelector('#total-duration');
+            if (totalEl) totalEl.textContent = formatted;
+        }
+        const persistentPlayer = document.getElementById('persistent-player');
+        if (persistentPlayer) {
+            const totalEl = persistentPlayer.querySelector('#total-duration-persistent');
+            if (totalEl) totalEl.textContent = formatted;
+        }
+    }
+}
+
 function initializeMusicEngine() {
     if (musicEngine.isInitialized) return;
 
     musicEngine.audioPlayer = document.getElementById('audio-player');
+    if (musicEngine.audioPlayer) {
+        musicEngine.audioPlayer.preload = 'metadata';
+    }
     // Restore saved volume or default
     const savedVol = parseFloat(localStorage.getItem('playerVolume'));
     musicEngine.audioPlayer.volume = isNaN(savedVol) ? 0.75 : Math.min(1, Math.max(0, savedVol));
@@ -515,8 +647,20 @@ function initializeMusicEngine() {
         if (!trackData) return;
 
         musicEngine.currentTrackIndex = trackIndex;
+        updateAlbumArtDisplays(resolveAlbumArt(trackData));
         musicEngine.audioPlayer.src = encodeURI(trackData.file);
         musicEngine.audioPlayer.load();
+        ensureTrackMetadata(trackIndex)
+            .then((meta) => {
+                if (!meta) return;
+                if (meta.duration) {
+                    applyDurationToUI(trackIndex, meta.duration);
+                }
+                if (musicEngine.currentTrackIndex === trackIndex && meta.artUrl) {
+                    updateAlbumArtDisplays(meta.artUrl);
+                }
+            })
+            .catch((err) => console.warn('Metadata load failed:', err));
         playTrack(); 
     };
 
@@ -676,6 +820,8 @@ function updateAllPlayerUIs() {
     const duration = audioPlayer.duration;
     const progressPercent = duration ? (currentTime / duration) * 100 : 0;
     const volume = audioPlayer.volume;
+
+    updateAlbumArtDisplays(resolveAlbumArt(track));
 
     // --- Update Main Player ---
     const mainPlayer = document.querySelector('.music-player');

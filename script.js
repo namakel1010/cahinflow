@@ -162,6 +162,40 @@ function applyTheme(themeName) {
     const playlist = (themeName === 'cute') ? cutePlaylist : coolPlaylist;
     contents[6] = createMusicPlayerHTML(playlist);
 
+    if (musicEngine && musicEngine.audioPlayer) {
+        try {
+            musicEngine.audioPlayer.pause();
+            musicEngine.audioPlayer.removeAttribute('src');
+            musicEngine.audioPlayer.load();
+        } catch (e) { console.warn('Audio reset failed', e); }
+        musicEngine.isPlaying = false;
+        const hasTracks = Array.isArray(musicEngine.playlist) && musicEngine.playlist.length > 0;
+        musicEngine.currentTrackIndex = hasTracks ? 0 : -1;
+        musicEngine.trackItems = [];
+        musicEngine.durations = [];
+    }
+
+    updateAlbumArtDisplays(DEFAULT_ALBUM_ART);
+    const persistentPlayer = document.getElementById('persistent-player');
+    if (persistentPlayer) {
+        const titleEl = persistentPlayer.querySelector('.title-persistent');
+        const artistEl = persistentPlayer.querySelector('.artist-persistent');
+        const progressEl = persistentPlayer.querySelector('.progress-bar-persistent');
+        const currentTimeEl = persistentPlayer.querySelector('#current-time-persistent');
+        const totalTimeEl = persistentPlayer.querySelector('#total-duration-persistent');
+        const artEl = persistentPlayer.querySelector('.album-art-persistent');
+        if (titleEl) titleEl.textContent = 'No Music Playing';
+        if (artistEl) artistEl.textContent = '';
+        if (progressEl) progressEl.style.width = '0%';
+        if (currentTimeEl) currentTimeEl.textContent = '00:00';
+        if (totalTimeEl) totalTimeEl.textContent = '00:00';
+        if (artEl) artEl.src = DEFAULT_ALBUM_ART_PERSISTENT;
+        persistentPlayer.classList.remove('visible');
+        if (!persistentPlayerDismissed) {
+            persistentPlayer.classList.remove('dismissed');
+        }
+    }
+
     lastChapterIndexVal = -1; // Force content refresh
     musicPlayerInitialized = false; // Reset music player initialization flag when theme changes
     
@@ -390,6 +424,8 @@ const musicEngine = {
 function createMusicPlayerHTML(playlist) {
     const workingPlaylist = playlist.map(track => ({ ...track }));
     musicEngine.playlist = workingPlaylist; // Store playlist for the engine
+    const initialTrack = workingPlaylist.length > 0 ? workingPlaylist[0] : null;
+    musicEngine.currentTrackIndex = initialTrack ? 0 : -1;
 
     const tracklistHTML = workingPlaylist.map((track, index) => `
         <li class="track-item" data-index="${index}">
@@ -412,14 +448,13 @@ function createMusicPlayerHTML(playlist) {
             <div class="track-info">
                 <img src="${DEFAULT_ALBUM_ART}" alt="Album Art" class="album-art" loading="lazy">
                 <div>
-                    <h3 class="title">曲を選んでください</h3>
-                    <p class="artist">リストから曲を選択して再生</p>
-                    <button class="follow-btn">フォローする</button>
+                    <h3 class="title">${initialTrack ? initialTrack.title : '準備中'}</h3>
+                    <p class="artist">${initialTrack ? initialTrack.artist : '曲の情報がありません'}</p>
+                    <a class="follow-btn" href="https://suno.com/@namakel" target="_blank" rel="noopener noreferrer">フォローする</a>
                 </div>
             </div>
-            <div class="controls flex items-center justify-between">
-                 <div class="flex items-center gap-3">
-                    <span class="preview-tag">フルサイズ</span>
+            <div class="controls">
+                 <div class="main-control-group">
                     <button class="control-btn" id="prev-track">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>
                     </button>
@@ -431,7 +466,7 @@ function createMusicPlayerHTML(playlist) {
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg>
                     </button>
                 </div>
-                <div class="volume-control flex items-center gap-2">
+                <div class="volume-control">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                     <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.75" class="volume-slider">
                 </div>
@@ -614,6 +649,15 @@ function initializeMusicEngine() {
 
     // --- Core Audio Logic ---
     const playTrack = () => {
+        if (musicEngine.audioPlayer && !(musicEngine.audioPlayer.currentSrc || musicEngine.audioPlayer.src)) {
+            if (musicEngine.playlist.length > 0) {
+                const fallbackIndex = (typeof musicEngine.currentTrackIndex === 'number' && musicEngine.currentTrackIndex >= 0)
+                    ? musicEngine.currentTrackIndex
+                    : 0;
+                loadTrack(fallbackIndex);
+            }
+            return;
+        }
         // Ensure persistent player is shown even if previously dismissed
         const pp = document.getElementById('persistent-player');
         if (pp) {
@@ -774,7 +818,9 @@ function initializeMainPlayerUI() {
 
     trackItems.forEach((track, index) => {
         track.addEventListener('click', () => {
-            if (musicEngine.currentTrackIndex === index) {
+            const audioEl = musicEngine.audioPlayer;
+            const hasSource = audioEl && (audioEl.currentSrc || audioEl.src);
+            if (musicEngine.currentTrackIndex === index && hasSource) {
                 musicEngine.isPlaying ? app.pauseTrack() : app.playTrack();
             } else {
                 app.loadTrack(index);
@@ -1069,7 +1115,7 @@ function initializeWebsite() {
         `<div class="title-wrapper"><h2 class="section-title">WORKS</h2></div>`,
         createMusicPlayerHTML(playlist),
         `<div class="title-wrapper"><h2 class="section-title">LINKS</h2></div>`,
-        `<div class="flex flex-col items-center justify-center text-center"><div class="links-grid non-functional"><a href="#" class="link-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3h-6Z"/></svg><span>SUNO</span></a><a href="#" class="link-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm4.5 14.5c-.2.3-.6.4-.9.2c-2.2-1.3-5-1.6-8.3-0.9c-.4 0.1-.7-.2-.8-.6c-.1-.4.2-.7.6-.8c3.7-0.8 6.8-0.4 9.3 1.1c.3.2.4.6.2.9zm1.2-2.7c-.3.4-.8.5-1.1.2c-2.5-1.5-6.3-2-9.8-1.1c-.5.1-.9-.2-1-.7c-.1-.5.2-.9.7-1c4-1 8.2-0.5 11.2 1.4c.4.2.5.8.2 1.2zm.1-2.9c-3-1.8-8-2.3-11.2-1.2c-.6.2-1.2-.2-1.4-.8c-.2-.6.2-1.2.8-1.4c3.8-1.2 9.4-0.6 13 1.5c.5.3.7.9.4 1.4c-.3.5-.9.7-1.4.4z"/></svg><span>SPOTIFY</span></a><a href="#" class="link-button"><svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" width="42" height="42"><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282"/><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282"/></svg><span>APPLE MUSIC</span></a><a href="#" class="link-button"><svg viewBox="0 0 1024 721" aria-hidden="true" fill="currentColor" width="42" height="42"><path d="M1007.9,285.1c-11-40.6-42.8-72.2-83.4-83.2C844,178.4,512,178.4,512,178.4s-332,0-412.5,23.5 c-40.6,11-72.4,42.6-83.4,83.2C2.6,365.6,2.6,512,2.6,512s0,146.4,13.5,226.9c11,40.6,42.8,72.2,83.4,83.2 C180,845.6,512,845.6,512,845.6s332,0,412.5-23.5c40.6-11,72.4-42.6,83.4-83.2C1021.4,658.4,1021.4,512,1021.4,512 S1021.4,365.6,1007.9,285.1z M409.6,604.4V311.4L678.4,458L409.6,604.4z"/></svg><span>YOUTUBE</span></a></div><p class="mt-8 text-lg opacity-70">Coming Soon...</p></div>`
+        `<div class="flex flex-col items-center justify-center text-center"><div class="links-grid"><a href="https://suno.com/@namakel" class="link-button" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3h-6Z"/></svg><span>SUNO</span></a><a href="#" class="link-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm4.5 14.5c-.2.3-.6.4-.9.2c-2.2-1.3-5-1.6-8.3-0.9c-.4 0.1-.7-.2-.8-.6c-.1-.4.2-.7.6-.8c3.7-0.8 6.8-0.4 9.3 1.1c.3.2.4.6.2.9zm1.2-2.7c-.3.4-.8.5-1.1.2c-2.5-1.5-6.3-2-9.8-1.1c-.5.1-.9-.2-1-.7c-.1-.5.2-.9.7-1c4-1 8.2-0.5 11.2 1.4c.4.2.5.8.2 1.2zm.1-2.9c-3-1.8-8-2.3-11.2-1.2c-.6.2-1.2-.2-1.4-.8c-.2-.6.2-1.2.8-1.4c3.8-1.2 9.4-0.6 13 1.5c.5.3.7.9.4 1.4c-.3.5-.9.7-1.4.4z"/></svg><span>SPOTIFY</span></a><a href="#" class="link-button"><svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" width="42" height="42"><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282"/><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282"/></svg><span>APPLE MUSIC</span></a><a href="#" class="link-button"><svg viewBox="0 0 1024 721" aria-hidden="true" fill="currentColor" width="42" height="42"><path d="M1007.9,285.1c-11-40.6-42.8-72.2-83.4-83.2C844,178.4,512,178.4,512,178.4s-332,0-412.5,23.5 c-40.6,11-72.4,42.6-83.4,83.2C2.6,365.6,2.6,512,2.6,512s0,146.4,13.5,226.9c11,40.6,42.8,72.2,83.4,83.2 C180,845.6,512,845.6,512,845.6s332,0,412.5-23.5c40.6-11,72.4-42.6,83.4-83.2C1021.4,658.4,1021.4,512,1021.4,512 S1021.4,365.6,1007.9,285.1z M409.6,604.4V311.4L678.4,458L409.6,604.4z"/></svg><span>YOUTUBE</span></a></div><p class="mt-8 text-lg opacity-70">Coming Soon...</p></div>`
     ];
 
     const scrollContainer = document.getElementById('scroll-container');

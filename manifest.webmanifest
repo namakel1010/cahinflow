@@ -1,0 +1,30 @@
+{
+  "name": "ChainFlow",
+  "short_name": "ChainFlow",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0B0D10",
+  "theme_color": "#0B0D10",
+  "description": "ChainFlowは、変幻するボーカルと疾走するビートで、クールな熱とキュートな輝きを同時に鳴らすAIミュージックユニット。",
+  "icons": [
+    {
+      "src": "chainflow/fabicon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "chainflow/fabicon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "chainflow/fabicon.jpg",
+      "sizes": "1024x1024",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

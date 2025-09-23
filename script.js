@@ -10,28 +10,42 @@ let lastChapterIndexVal = -1;
 let musicPlayerInitialized = false;
 let persistentPlayerDismissed = false;
 
-const DEFAULT_ALBUM_ART = 'https://placehold.co/120x120/1a1a2e/e0e0e0?text=Album+Art';
-const DEFAULT_ALBUM_ART_PERSISTENT = 'https://placehold.co/60x60/1a1a2e/e0e0e0?text=Art';
+const PLAYLIST_ALBUM_ART = {
+    cool: {
+        main: 'assets/playlists/cool.jpg',
+        persistent: 'assets/playlists/cool.jpg'
+    },
+    cute: {
+        main: 'assets/playlists/cute.jpg',
+        persistent: 'assets/playlists/cute.jpg'
+    }
+};
 
 const coolPlaylist = [
-    { title: 'BlueMoon', artist: 'ChainFlow', file: 'works-cool/BlueMoon.mp3' },
-    { title: 'ChainFlow', artist: 'ChainFlow', file: 'works-cool/ChainFlow.mp3' },
-    { title: 'Fragments of…', artist: 'ChainFlow', file: 'works-cool/Fragments of….mp3' },
-    { title: 'Inspect Before …', artist: 'ChainFlow', file: 'works-cool/Inspect Before … .mp3' },
-    { title: 'Lilith’s Shadow', artist: 'ChainFlow', file: 'works-cool/Lilith’s Shadow .mp3' },
-    { title: 'still', artist: 'ChainFlow', file: 'works-cool/still.mp3' },
-    { title: 'Sync Now', artist: 'ChainFlow', file: 'works-cool/Sync Now.mp3' },
-    { title: 'what if', artist: 'ChainFlow', file: 'works-cool/what if.mp3' }
+    { title: 'BlueMoon', artist: 'ChainFlow', file: 'works-cool/BlueMoon.mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'ChainFlow', artist: 'ChainFlow', file: 'works-cool/ChainFlow.mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'Fragments of…', artist: 'ChainFlow', file: 'works-cool/Fragments of….mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'Inspect Before …', artist: 'ChainFlow', file: 'works-cool/Inspect Before … .mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'Lilith’s Shadow', artist: 'ChainFlow', file: 'works-cool/Lilith’s Shadow .mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'still', artist: 'ChainFlow', file: 'works-cool/still.mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'Sync Now', artist: 'ChainFlow', file: 'works-cool/Sync Now.mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'what if', artist: 'ChainFlow', file: 'works-cool/what if.mp3', cover: PLAYLIST_ALBUM_ART.cool.main }
 ];
 
 const cutePlaylist = [
-    { title: 'alt account', artist: 'ChainFlow', file: 'works-cute/alt account .mp3' },
-    { title: 'Bittersweet Times', artist: 'ChainFlow', file: 'works-cute/Bittersweet Times.mp3' },
-    { title: 'BUGしてる', artist: 'ChainFlow', file: 'works-cute/BUGしてる.mp3' },
-    { title: 'Rhythm Eclipse', artist: 'ChainFlow', file: 'works-cute/Rhythm Eclipse.mp3' },
-    { title: 'Show me', artist: 'ChainFlow', file: 'works-cute/Show me.mp3' },
-    { title: 'ピエタの残響', artist: 'ChainFlow', file: 'works-cute/ピエタの残響.mp3' }
+    { title: 'alt account', artist: 'ChainFlow', file: 'works-cute/alt account .mp3', cover: PLAYLIST_ALBUM_ART.cute.main },
+    { title: 'Bittersweet Times', artist: 'ChainFlow', file: 'works-cute/Bittersweet Times.mp3', cover: PLAYLIST_ALBUM_ART.cute.main },
+    { title: 'BUGしてる', artist: 'ChainFlow', file: 'works-cute/BUGしてる.mp3', cover: PLAYLIST_ALBUM_ART.cute.main },
+    { title: 'Rhythm Eclipse', artist: 'ChainFlow', file: 'works-cute/Rhythm Eclipse.mp3', cover: PLAYLIST_ALBUM_ART.cute.main },
+    { title: 'Show me', artist: 'ChainFlow', file: 'works-cute/Show me.mp3', cover: PLAYLIST_ALBUM_ART.cute.main },
+    { title: 'ピエタの残響', artist: 'ChainFlow', file: 'works-cute/ピエタの残響.mp3', cover: PLAYLIST_ALBUM_ART.cute.main }
 ];
+
+
+function getThemeAlbumArt(themeName = currentTheme) {
+    const key = themeName && PLAYLIST_ALBUM_ART[themeName] ? themeName : 'cool';
+    return PLAYLIST_ALBUM_ART[key];
+}
 
 
 const coolAbout = [
@@ -88,9 +102,15 @@ const externalLinks = [
     },
     {
         label: 'YOUTUBE',
-        url: '#',
+        url: 'https://www.youtube.com/@Dj-Konga',
         embedUrl: '',
         svg: `<svg viewBox="0 0 1024 721" aria-hidden="true" fill="currentColor" width="42" height="42"><path d="M1007.9,285.1c-11-40.6-42.8-72.2-83.4-83.2C844,178.4,512,178.4,512,178.4s-332,0-412.5,23.5c-40.6,11-72.4,42.6-83.4,83.2C2.6,365.6,2.6,512,2.6,512s0,146.4,13.5,226.9c11,40.6,42.8,72.2,83.4,83.2C180,845.6,512,845.6,512,845.6s332,0,412.5-23.5c40.6-11,72.4-42.6,83.4-83.2C1021.4,658.4,1021.4,512,1021.4,512S1021.4,365.6,1007.9,285.1z M409.6,604.4V311.4L678.4,458L409.6,604.4z"/></svg>`
+    },
+    {
+        label: 'TIKTOK',
+        url: 'https://www.tiktok.com/@chainf1ow?_t=ZS-8zvSoO8hpVI&_r=1',
+        embedUrl: '',
+        svg: `<svg viewBox="0 0 24 24" aria-hidden="true" width="42" height="42" fill="currentColor"><path d="M15.75 2.25c.23 2.04 1.53 3.4 3.5 3.55V8.6c-1.36.1-2.54-.33-3.5-.97v6.79c0 3.34-2.43 5.83-5.91 5.83-3.2 0-5.84-2.59-5.84-5.79 0-3.21 2.52-5.79 5.84-5.79.4 0 .79.04 1.18.12v3.07a2.65 2.65 0 0 0-1.18-.27c-1.43 0-2.6 1.17-2.6 2.68 0 1.47 1.17 2.67 2.6 2.67 1.54 0 2.59-1.04 2.59-2.67V2.25h3.52Z"/></svg>`
     }
 ];
 
@@ -212,7 +232,7 @@ function applyTheme(themeName) {
         musicEngine.loadedTrackFile = null;
     }
 
-    updateAlbumArtDisplays(DEFAULT_ALBUM_ART);
+    updateAlbumArtDisplays(getThemeAlbumArt(themeName).main);
     const persistentPlayer = document.getElementById('persistent-player');
     if (persistentPlayer) {
         const titleEl = persistentPlayer.querySelector('.title-persistent');
@@ -226,7 +246,7 @@ function applyTheme(themeName) {
         if (progressEl) progressEl.style.width = '0%';
         if (currentTimeEl) currentTimeEl.textContent = '00:00';
         if (totalTimeEl) totalTimeEl.textContent = '00:00';
-        if (artEl) artEl.src = DEFAULT_ALBUM_ART_PERSISTENT;
+        if (artEl) artEl.src = getThemeAlbumArt(themeName).persistent;
         persistentPlayer.classList.remove('visible');
         if (!persistentPlayerDismissed) {
             persistentPlayer.classList.remove('dismissed');
@@ -464,6 +484,7 @@ function createMusicPlayerHTML(playlist) {
     musicEngine.playlist = workingPlaylist; // Store playlist for the engine
     const initialTrack = workingPlaylist.length > 0 ? workingPlaylist[0] : null;
     musicEngine.currentTrackIndex = initialTrack ? 0 : -1;
+    const initialArt = resolveAlbumArt(initialTrack);
 
     const tracklistHTML = workingPlaylist.map((track, index) => `
         <li class="track-item" data-index="${index}">
@@ -484,7 +505,7 @@ function createMusicPlayerHTML(playlist) {
     return `
         <div class="music-player">
             <div class="track-info">
-                <img src="${DEFAULT_ALBUM_ART}" alt="Album Art" class="album-art" loading="lazy">
+                <img src="${initialArt}" alt="Album Art" class="album-art" loading="lazy">
                 <div>
                     <h3 class="title">${initialTrack ? initialTrack.title : '準備中'}</h3>
                     <p class="artist">${initialTrack ? initialTrack.artist : '曲の情報がありません'}</p>
@@ -543,18 +564,19 @@ function blobToDataUrl(blob) {
     });
 }
 
-function resolveAlbumArt(track) {
-    if (!track) return DEFAULT_ALBUM_ART;
+function resolveAlbumArt(track, themeName = currentTheme) {
+    const themeArt = getThemeAlbumArt(themeName);
+    if (!track) return themeArt.main;
     const cached = musicEngine.metadataCache.get(track.file);
     if (cached && cached.artUrl) return cached.artUrl;
     if (track.cover) return track.cover;
-    return DEFAULT_ALBUM_ART;
+    return themeArt.main;
 }
 
 function updateAlbumArtDisplays(artUrl) {
-    const isDefault = !artUrl || artUrl === DEFAULT_ALBUM_ART;
-    const resolvedMain = isDefault ? DEFAULT_ALBUM_ART : artUrl;
-    const resolvedPersistent = isDefault ? DEFAULT_ALBUM_ART_PERSISTENT : artUrl;
+    const themeArt = getThemeAlbumArt();
+    const resolvedMain = artUrl || themeArt.main;
+    const resolvedPersistent = artUrl || themeArt.persistent;
     const mainArt = document.querySelector('.music-player .album-art');
     if (mainArt && mainArt.src !== resolvedMain) {
         mainArt.src = resolvedMain;

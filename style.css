@@ -442,9 +442,18 @@ body.menu-open { overflow: hidden; }
     .header-right-controls {
         width: 100%;
         justify-content: flex-end;
+        gap: 6px;
     }
 
-    .menu-text { display: none; }
+    .menu-container {
+        gap: 6px;
+    }
+
+    .menu-text {
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+        white-space: nowrap;
+    }
 
     .theme-segment {
         max-width: none;

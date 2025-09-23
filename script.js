@@ -10,23 +10,42 @@ let lastChapterIndexVal = -1;
 let musicPlayerInitialized = false;
 let persistentPlayerDismissed = false;
 
+const PLAYLIST_ALBUM_ART = {
+    cool: {
+        main: 'assets/playlists/cool.jpg',
+        persistent: 'assets/playlists/cool.jpg'
+    },
+    cute: {
+        main: 'assets/playlists/cute.jpg',
+        persistent: 'assets/playlists/cute.jpg'
+    }
+};
+
 const coolPlaylist = [
-    { title: 'chainflow', artist: 'ChainFlow', file: 'works-cool/chainflow.wav' },
-    { title: 'Fragments of…', artist: 'ChainFlow', file: 'works-cool/Fragments of….wav' },
-    { title: 'respiro vitae', artist: 'ChainFlow', file: 'works-cool/respiro vitae.wav' },
-    { title: 'still', artist: 'ChainFlow', file: 'works-cool/still.wav' },
-    { title: 'what if', artist: 'ChainFlow', file: 'works-cool/what if.wav' }
+    { title: 'BlueMoon', artist: 'ChainFlow', file: 'works-cool/BlueMoon.mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'ChainFlow', artist: 'ChainFlow', file: 'works-cool/ChainFlow.mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'Fragments of…', artist: 'ChainFlow', file: 'works-cool/Fragments of….mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'Inspect Before …', artist: 'ChainFlow', file: 'works-cool/Inspect Before … .mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'Lilith’s Shadow', artist: 'ChainFlow', file: 'works-cool/Lilith’s Shadow .mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'still', artist: 'ChainFlow', file: 'works-cool/still.mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'Sync Now', artist: 'ChainFlow', file: 'works-cool/Sync Now.mp3', cover: PLAYLIST_ALBUM_ART.cool.main },
+    { title: 'what if', artist: 'ChainFlow', file: 'works-cool/what if.mp3', cover: PLAYLIST_ALBUM_ART.cool.main }
 ];
 
 const cutePlaylist = [
-    { title: 'Bittersweet Times', artist: 'ChainFlow', file: 'works-cute/Bittersweet Times.wav' },
-    { title: 'BUGしてる', artist: 'ChainFlow', file: 'works-cute/BUGしてる.wav' },
-    { title: 'Inspect Before …', artist: 'ChainFlow', file: 'works-cute/Inspect Before … .wav' },
-    { title: 'Rhythm Eclipse', artist: 'ChainFlow', file: 'works-cute/Rhythm Eclipse.wav' },
-    { title: 'Show me', artist: 'ChainFlow', file: 'works-cute/Show me.wav' },
-    { title: 'Sync Now', artist: 'ChainFlow', file: 'works-cute/Sync Now.wav' },
-    { title: 'ピエタの残響', artist: 'ChainFlow', file: 'works-cute/ピエタの残響.wav' }
+    { title: 'alt account', artist: 'ChainFlow', file: 'works-cute/alt account .mp3', cover: PLAYLIST_ALBUM_ART.cute.main },
+    { title: 'Bittersweet Times', artist: 'ChainFlow', file: 'works-cute/Bittersweet Times.mp3', cover: PLAYLIST_ALBUM_ART.cute.main },
+    { title: 'BUGしてる', artist: 'ChainFlow', file: 'works-cute/BUGしてる.mp3', cover: PLAYLIST_ALBUM_ART.cute.main },
+    { title: 'Rhythm Eclipse', artist: 'ChainFlow', file: 'works-cute/Rhythm Eclipse.mp3', cover: PLAYLIST_ALBUM_ART.cute.main },
+    { title: 'Show me', artist: 'ChainFlow', file: 'works-cute/Show me.mp3', cover: PLAYLIST_ALBUM_ART.cute.main },
+    { title: 'ピエタの残響', artist: 'ChainFlow', file: 'works-cute/ピエタの残響.mp3', cover: PLAYLIST_ALBUM_ART.cute.main }
 ];
+
+
+function getThemeAlbumArt(themeName = currentTheme) {
+    const key = themeName && PLAYLIST_ALBUM_ART[themeName] ? themeName : 'cool';
+    return PLAYLIST_ALBUM_ART[key];
+}
 
 
 const coolAbout = [
@@ -61,6 +80,47 @@ const cuteMedia = {
         'chainflow/media10.jpg'
     ]
 };
+
+const externalLinks = [
+    {
+        label: 'SUNO',
+        url: 'https://suno.com/@namakel',
+        embedUrl: 'https://suno.com/embed/@namakel',
+        svg: `<svg viewBox="0 0 24 24" aria-hidden="true" width="42" height="42" fill="currentColor"><text x="12" y="18" text-anchor="middle" font-size="18" font-family="'Noto Sans JP', 'Poppins', sans-serif">♪</text></svg>`
+    },
+    {
+        label: 'SPOTIFY',
+        url: 'https://open.spotify.com/artist/YOUR-SPOTIFY-ID',
+        embedUrl: 'https://open.spotify.com/embed/artist/YOUR-SPOTIFY-ID',
+        svg: `<svg viewBox="0 0 64 64" aria-hidden="true" width="42" height="42" fill="currentColor"><path d="M32 6C17.088 6 5 18.088 5 33s12.088 27 27 27 27-12.088 27-27S46.912 6 32 6Zm12.452 32.784a2.5 2.5 0 0 1-3.43.812c-9.184-5.632-20.728-2.416-21.224-2.264a2.5 2.5 0 0 1-1.454-4.784c.53-.16 13.118-3.984 24.556 2.872a2.5 2.5 0 0 1 .552 3.364Zm2.248-7.36a2.8 2.8 0 0 1-3.828.908c-10.52-6.368-24.68-3.768-25.24-3.624a2.8 2.8 0 1 1-1.4-5.416c.64-.168 16.004-3.984 28.772 4.2a2.8 2.8 0 0 1 1.696 3.932Zm.36-7.456c-12.144-7.208-27.372-4.272-28.02-4.112a2.5 2.5 0 1 1-1.148-4.872c.68-.16 17.064-3.648 30.968 4.984a2.5 2.5 0 0 1-2.8 4Z"/></svg>`
+    },
+    {
+        label: 'APPLE MUSIC',
+        url: '#',
+        embedUrl: '',
+        svg: `<svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" width="42" height="42"><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282"/><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282"/></svg>`
+    },
+    {
+        label: 'YOUTUBE',
+        url: 'https://www.youtube.com/@Dj-Konga',
+        embedUrl: '',
+        svg: `<svg viewBox="0 0 1024 721" aria-hidden="true" fill="currentColor" width="42" height="42"><path d="M1007.9,285.1c-11-40.6-42.8-72.2-83.4-83.2C844,178.4,512,178.4,512,178.4s-332,0-412.5,23.5c-40.6,11-72.4,42.6-83.4,83.2C2.6,365.6,2.6,512,2.6,512s0,146.4,13.5,226.9c11,40.6,42.8,72.2,83.4,83.2C180,845.6,512,845.6,512,845.6s332,0,412.5-23.5c40.6-11,72.4-42.6,83.4-83.2C1021.4,658.4,1021.4,512,1021.4,512S1021.4,365.6,1007.9,285.1z M409.6,604.4V311.4L678.4,458L409.6,604.4z"/></svg>`
+    },
+    {
+        label: 'TIKTOK',
+        url: 'https://www.tiktok.com/@chainf1ow?_t=ZS-8zvSoO8hpVI&_r=1',
+        embedUrl: '',
+        svg: `<svg viewBox="0 0 24 24" aria-hidden="true" width="42" height="42" fill="currentColor"><path d="M15.75 2.25c.23 2.04 1.53 3.4 3.5 3.55V8.6c-1.36.1-2.54-.33-3.5-.97v6.79c0 3.34-2.43 5.83-5.91 5.83-3.2 0-5.84-2.59-5.84-5.79 0-3.21 2.52-5.79 5.84-5.79.4 0 .79.04 1.18.12v3.07a2.65 2.65 0 0 0-1.18-.27c-1.43 0-2.6 1.17-2.6 2.68 0 1.47 1.17 2.67 2.6 2.67 1.54 0 2.59-1.04 2.59-2.67V2.25h3.52Z"/></svg>`
+    }
+];
+
+function buildLinksMarkup(links = externalLinks) {
+    const buttons = links.map(({ label, url, svg, embedUrl }) => {
+        const embedAttr = embedUrl ? ` data-embed-url="${embedUrl}"` : '';
+        return `<a href="${url}" class="link-button" target="_blank" rel="noopener noreferrer"${embedAttr} aria-label="${label}">${svg}<span>${label}</span></a>`;
+    }).join('');
+    return `<div class="flex flex-col items-center justify-center text-center"><div class="links-grid">${buttons}</div><p class="mt-8 text-lg opacity-70">Coming Soon...</p></div>`;
+}
 
 let beatAnimationId = null;
 let feTurbulence, feDisplacementMap;
@@ -156,6 +216,42 @@ function applyTheme(themeName) {
     
     const playlist = (themeName === 'cute') ? cutePlaylist : coolPlaylist;
     contents[6] = createMusicPlayerHTML(playlist);
+    contents[8] = buildLinksMarkup();
+
+    if (musicEngine && musicEngine.audioPlayer) {
+        try {
+            musicEngine.audioPlayer.pause();
+            musicEngine.audioPlayer.removeAttribute('src');
+            musicEngine.audioPlayer.load();
+        } catch (e) { console.warn('Audio reset failed', e); }
+        musicEngine.isPlaying = false;
+        const hasTracks = Array.isArray(musicEngine.playlist) && musicEngine.playlist.length > 0;
+        musicEngine.currentTrackIndex = hasTracks ? 0 : -1;
+        musicEngine.trackItems = [];
+        musicEngine.durations = [];
+        musicEngine.loadedTrackFile = null;
+    }
+
+    updateAlbumArtDisplays(getThemeAlbumArt(themeName).main);
+    const persistentPlayer = document.getElementById('persistent-player');
+    if (persistentPlayer) {
+        const titleEl = persistentPlayer.querySelector('.title-persistent');
+        const artistEl = persistentPlayer.querySelector('.artist-persistent');
+        const progressEl = persistentPlayer.querySelector('.progress-bar-persistent');
+        const currentTimeEl = persistentPlayer.querySelector('#current-time-persistent');
+        const totalTimeEl = persistentPlayer.querySelector('#total-duration-persistent');
+        const artEl = persistentPlayer.querySelector('.album-art-persistent');
+        if (titleEl) titleEl.textContent = 'No Music Playing';
+        if (artistEl) artistEl.textContent = '';
+        if (progressEl) progressEl.style.width = '0%';
+        if (currentTimeEl) currentTimeEl.textContent = '00:00';
+        if (totalTimeEl) totalTimeEl.textContent = '00:00';
+        if (artEl) artEl.src = getThemeAlbumArt(themeName).persistent;
+        persistentPlayer.classList.remove('visible');
+        if (!persistentPlayerDismissed) {
+            persistentPlayer.classList.remove('dismissed');
+        }
+    }
 
     lastChapterIndexVal = -1; // Force content refresh
     musicPlayerInitialized = false; // Reset music player initialization flag when theme changes
@@ -378,13 +474,19 @@ const musicEngine = {
     playlist: [],
     trackItems: [], // The <li> elements from the main player
     durations: [],  // Cached durations for each track (seconds)
+    metadataCache: new Map(),
+    metadataPromises: new Map(),
+    loadedTrackFile: null,
 };
 
 function createMusicPlayerHTML(playlist) {
-    const limitedPlaylist = playlist.slice(0, 5);
-    musicEngine.playlist = limitedPlaylist; // Store playlist for the engine
+    const workingPlaylist = playlist.map(track => ({ ...track }));
+    musicEngine.playlist = workingPlaylist; // Store playlist for the engine
+    const initialTrack = workingPlaylist.length > 0 ? workingPlaylist[0] : null;
+    musicEngine.currentTrackIndex = initialTrack ? 0 : -1;
+    const initialArt = resolveAlbumArt(initialTrack);
 
-    const tracklistHTML = limitedPlaylist.map((track, index) => `
+    const tracklistHTML = workingPlaylist.map((track, index) => `
         <li class="track-item" data-index="${index}">
             <div class="track-details">
                 <div class="relative w-5 h-5 flex items-center justify-center">
@@ -403,16 +505,15 @@ function createMusicPlayerHTML(playlist) {
     return `
         <div class="music-player">
             <div class="track-info">
-                <img src="https://placehold.co/120x120/1a1a2e/e0e0e0?text=Album+Art" alt="Album Art" class="album-art" loading="lazy">
+                <img src="${initialArt}" alt="Album Art" class="album-art" loading="lazy">
                 <div>
-                    <h3 class="title">曲を選んでください</h3>
-                    <p class="artist">リストから曲を選択して再生</p>
-                    <button class="follow-btn">フォローする</button>
+                    <h3 class="title">${initialTrack ? initialTrack.title : '準備中'}</h3>
+                    <p class="artist">${initialTrack ? initialTrack.artist : '曲の情報がありません'}</p>
+                    <a class="follow-btn" href="https://suno.com/@namakel" target="_blank" rel="noopener noreferrer">フォローする</a>
                 </div>
             </div>
-            <div class="controls flex items-center justify-between">
-                 <div class="flex items-center gap-3">
-                    <span class="preview-tag">プレビュー</span>
+            <div class="controls">
+                 <div class="main-control-group">
                     <button class="control-btn" id="prev-track">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>
                     </button>
@@ -424,7 +525,7 @@ function createMusicPlayerHTML(playlist) {
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg>
                     </button>
                 </div>
-                <div class="volume-control flex items-center gap-2">
+                <div class="volume-control">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                     <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.75" class="volume-slider">
                 </div>
@@ -441,10 +542,136 @@ function createMusicPlayerHTML(playlist) {
     `;
 }
 
+function getMetadataClient() {
+    if (typeof window !== 'undefined') {
+        const direct = window.musicMetadata;
+        if (direct && typeof direct.parseBlob === 'function') return direct;
+        const alt = window.musicMetadataBrowser;
+        if (alt && typeof alt.parseBlob === 'function') return alt;
+    }
+    if (typeof musicMetadata !== 'undefined' && typeof musicMetadata.parseBlob === 'function') {
+        return musicMetadata;
+    }
+    return null;
+}
+
+function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+    });
+}
+
+function resolveAlbumArt(track, themeName = currentTheme) {
+    const themeArt = getThemeAlbumArt(themeName);
+    if (!track) return themeArt.main;
+    const cached = musicEngine.metadataCache.get(track.file);
+    if (cached && cached.artUrl) return cached.artUrl;
+    if (track.cover) return track.cover;
+    return themeArt.main;
+}
+
+function updateAlbumArtDisplays(artUrl) {
+    const themeArt = getThemeAlbumArt();
+    const resolvedMain = artUrl || themeArt.main;
+    const resolvedPersistent = artUrl || themeArt.persistent;
+    const mainArt = document.querySelector('.music-player .album-art');
+    if (mainArt && mainArt.src !== resolvedMain) {
+        mainArt.src = resolvedMain;
+    }
+    const persistentArt = document.querySelector('#persistent-player .album-art-persistent');
+    if (persistentArt && persistentArt.src !== resolvedPersistent) {
+        persistentArt.src = resolvedPersistent;
+    }
+}
+
+async function ensureTrackMetadata(trackIndex) {
+    const trackData = musicEngine.playlist[trackIndex];
+    if (!trackData || !trackData.file) return null;
+
+    const cached = musicEngine.metadataCache.get(trackData.file);
+    if (cached) return cached;
+
+    if (musicEngine.metadataPromises.has(trackData.file)) {
+        return musicEngine.metadataPromises.get(trackData.file);
+    }
+
+    const metadataClient = getMetadataClient();
+    if (!metadataClient) {
+        const fallback = { artUrl: trackData.cover || '', duration: null };
+        musicEngine.metadataCache.set(trackData.file, fallback);
+        return fallback;
+    }
+
+    const promise = (async () => {
+        try {
+            const resourceUrl = encodeURI(trackData.file);
+            const response = await fetch(resourceUrl);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch ${trackData.file}: ${response.status}`);
+            }
+            const blob = await response.blob();
+            const metadata = await metadataClient.parseBlob(blob);
+            const picture = (metadata && metadata.common && Array.isArray(metadata.common.picture))
+                ? metadata.common.picture[0]
+                : null;
+            let artUrl = trackData.cover || '';
+            if (picture && picture.data) {
+                const artBlob = new Blob([picture.data], { type: picture.format || 'image/jpeg' });
+                artUrl = await blobToDataUrl(artBlob);
+            }
+            const duration = metadata && metadata.format ? metadata.format.duration || null : null;
+            const result = { artUrl, duration };
+            musicEngine.metadataCache.set(trackData.file, result);
+            return result;
+        } catch (error) {
+            console.warn('Metadata extraction failed for', trackData.file, error);
+            const fallback = { artUrl: trackData.cover || '', duration: null };
+            musicEngine.metadataCache.set(trackData.file, fallback);
+            return fallback;
+        } finally {
+            musicEngine.metadataPromises.delete(trackData.file);
+        }
+    })();
+
+    musicEngine.metadataPromises.set(trackData.file, promise);
+    return promise;
+}
+
+function applyDurationToUI(index, durationSeconds) {
+    if (typeof durationSeconds !== 'number' || isNaN(durationSeconds)) return;
+    musicEngine.durations[index] = durationSeconds;
+
+    const item = musicEngine.trackItems[index];
+    if (item) {
+        const durationEl = item.querySelector('.track-duration');
+        if (durationEl) durationEl.textContent = formatTime(durationSeconds);
+    }
+
+    if (musicEngine.currentTrackIndex === index) {
+        const formatted = formatTime(durationSeconds);
+        const mainPlayer = document.querySelector('.music-player');
+        if (mainPlayer) {
+            const totalEl = mainPlayer.querySelector('#total-duration');
+            if (totalEl) totalEl.textContent = formatted;
+        }
+        const persistentPlayer = document.getElementById('persistent-player');
+        if (persistentPlayer) {
+            const totalEl = persistentPlayer.querySelector('#total-duration-persistent');
+            if (totalEl) totalEl.textContent = formatted;
+        }
+    }
+}
+
 function initializeMusicEngine() {
     if (musicEngine.isInitialized) return;
 
     musicEngine.audioPlayer = document.getElementById('audio-player');
+    if (musicEngine.audioPlayer) {
+        musicEngine.audioPlayer.preload = 'metadata';
+    }
     // Restore saved volume or default
     const savedVol = parseFloat(localStorage.getItem('playerVolume'));
     musicEngine.audioPlayer.volume = isNaN(savedVol) ? 0.75 : Math.min(1, Math.max(0, savedVol));
@@ -482,26 +709,48 @@ function initializeMusicEngine() {
 
     // --- Core Audio Logic ---
     const playTrack = () => {
-        // Ensure persistent player is shown even if previously dismissed
-        const pp = document.getElementById('persistent-player');
-        if (pp) {
-            pp.classList.remove('dismissed');
-            pp.classList.add('visible');
-        }
-        try {
-            localStorage.removeItem('playerDismissed');
-            persistentPlayerDismissed = false;
-            const rbtn = document.getElementById('restore-player-btn');
-            if (rbtn) rbtn.style.display = 'none';
-        } catch (e) {}
+        if (!musicEngine.audioPlayer || musicEngine.playlist.length === 0) return;
 
-        musicEngine.audioPlayer.play().then(() => {
-            musicEngine.isPlaying = true;
-            updateAllPlayerUIs();
-            const el = document.getElementById('persistent-player');
-            if (el) el.classList.add('visible');
-            document.body.classList.add('persistent-player-visible');
-        }).catch(e => console.error("Audio play error:", e));
+        const currentTrack = musicEngine.playlist[musicEngine.currentTrackIndex];
+        if (!currentTrack) return;
+
+        if (musicEngine.loadedTrackFile !== currentTrack.file) {
+            loadTrack(musicEngine.currentTrackIndex);
+            return;
+        }
+
+        const needsSource = !(musicEngine.audioPlayer.currentSrc || musicEngine.audioPlayer.src);
+        if (needsSource) {
+            const fallbackIndex = (typeof musicEngine.currentTrackIndex === 'number' && musicEngine.currentTrackIndex >= 0)
+                ? musicEngine.currentTrackIndex
+                : 0;
+            loadTrack(fallbackIndex);
+            return;
+        }
+
+        const startPlayback = () => {
+            const pp = document.getElementById('persistent-player');
+            if (pp) {
+                pp.classList.remove('dismissed');
+                pp.classList.add('visible');
+            }
+            try {
+                localStorage.removeItem('playerDismissed');
+                persistentPlayerDismissed = false;
+                const rbtn = document.getElementById('restore-player-btn');
+                if (rbtn) rbtn.style.display = 'none';
+            } catch (e) {}
+
+            musicEngine.audioPlayer.play().then(() => {
+                musicEngine.isPlaying = true;
+                updateAllPlayerUIs();
+                const el = document.getElementById('persistent-player');
+                if (el) el.classList.add('visible');
+                document.body.classList.add('persistent-player-visible');
+            }).catch(e => console.error("Audio play error:", e));
+        };
+
+        startPlayback();
     };
 
     const pauseTrack = () => {
@@ -515,8 +764,21 @@ function initializeMusicEngine() {
         if (!trackData) return;
 
         musicEngine.currentTrackIndex = trackIndex;
+        updateAlbumArtDisplays(resolveAlbumArt(trackData));
         musicEngine.audioPlayer.src = encodeURI(trackData.file);
         musicEngine.audioPlayer.load();
+        musicEngine.loadedTrackFile = trackData.file;
+        ensureTrackMetadata(trackIndex)
+            .then((meta) => {
+                if (!meta) return;
+                if (meta.duration) {
+                    applyDurationToUI(trackIndex, meta.duration);
+                }
+                if (musicEngine.currentTrackIndex === trackIndex && meta.artUrl) {
+                    updateAlbumArtDisplays(meta.artUrl);
+                }
+            })
+            .catch((err) => console.warn('Metadata load failed:', err));
         playTrack(); 
     };
 
@@ -630,7 +892,9 @@ function initializeMainPlayerUI() {
 
     trackItems.forEach((track, index) => {
         track.addEventListener('click', () => {
-            if (musicEngine.currentTrackIndex === index) {
+            const audioEl = musicEngine.audioPlayer;
+            const hasSource = audioEl && (audioEl.currentSrc || audioEl.src);
+            if (musicEngine.currentTrackIndex === index && hasSource) {
                 musicEngine.isPlaying ? app.pauseTrack() : app.playTrack();
             } else {
                 app.loadTrack(index);
@@ -676,6 +940,8 @@ function updateAllPlayerUIs() {
     const duration = audioPlayer.duration;
     const progressPercent = duration ? (currentTime / duration) * 100 : 0;
     const volume = audioPlayer.volume;
+
+    updateAlbumArtDisplays(resolveAlbumArt(track));
 
     // --- Update Main Player ---
     const mainPlayer = document.querySelector('.music-player');
@@ -923,7 +1189,7 @@ function initializeWebsite() {
         `<div class="title-wrapper"><h2 class="section-title">WORKS</h2></div>`,
         createMusicPlayerHTML(playlist),
         `<div class="title-wrapper"><h2 class="section-title">LINKS</h2></div>`,
-        `<div class="flex flex-col items-center justify-center text-center"><div class="links-grid non-functional"><a href="#" class="link-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4V7h4V3h-6Z"/></svg><span>SUNO</span></a><a href="#" class="link-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm4.5 14.5c-.2.3-.6.4-.9.2c-2.2-1.3-5-1.6-8.3-0.9c-.4 0.1-.7-.2-.8-.6c-.1-.4.2-.7.6-.8c3.7-0.8 6.8-0.4 9.3 1.1c.3.2.4.6.2.9zm1.2-2.7c-.3.4-.8.5-1.1.2c-2.5-1.5-6.3-2-9.8-1.1c-.5.1-.9-.2-1-.7c-.1-.5.2-.9.7-1c4-1 8.2-0.5 11.2 1.4c.4.2.5.8.2 1.2zm.1-2.9c-3-1.8-8-2.3-11.2-1.2c-.6.2-1.2-.2-1.4-.8c-.2-.6.2-1.2.8-1.4c3.8-1.2 9.4-0.6 13 1.5c.5.3.7.9.4 1.4c-.3.5-.9.7-1.4.4z"/></svg><span>SPOTIFY</span></a><a href="#" class="link-button"><svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" width="42" height="42"><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282"/><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282"/></svg><span>APPLE MUSIC</span></a><a href="#" class="link-button"><svg viewBox="0 0 1024 721" aria-hidden="true" fill="currentColor" width="42" height="42"><path d="M1007.9,285.1c-11-40.6-42.8-72.2-83.4-83.2C844,178.4,512,178.4,512,178.4s-332,0-412.5,23.5 c-40.6,11-72.4,42.6-83.4,83.2C2.6,365.6,2.6,512,2.6,512s0,146.4,13.5,226.9c11,40.6,42.8,72.2,83.4,83.2 C180,845.6,512,845.6,512,845.6s332,0,412.5-23.5c40.6-11,72.4-42.6,83.4-83.2C1021.4,658.4,1021.4,512,1021.4,512 S1021.4,365.6,1007.9,285.1z M409.6,604.4V311.4L678.4,458L409.6,604.4z"/></svg><span>YOUTUBE</span></a></div><p class="mt-8 text-lg opacity-70">Coming Soon...</p></div>`
+        buildLinksMarkup()
     ];
 
     const scrollContainer = document.getElementById('scroll-container');
@@ -1039,12 +1305,14 @@ function initializeWebsite() {
         currentPageEl.textContent = String(Math.min(contents.length + 1, visualChapterIndex + 1)).padStart(2, '0');
         
         const isNowMusicSection = (visualChapterIndex === 6);
+        const isLinksSection = (visualChapterIndex === 8);
         isMusicSectionActive = isNowMusicSection;
         // Toggle stronger background muting when the music player is visible
         document.body.classList.toggle('music-mode', isNowMusicSection);
         // Enable pointer events only on the music section so controls are clickable
         if (textDisplayArea) {
-            textDisplayArea.style.pointerEvents = isNowMusicSection ? 'auto' : 'none';
+            const shouldEnablePointerEvents = isNowMusicSection || isLinksSection;
+            textDisplayArea.style.pointerEvents = shouldEnablePointerEvents ? 'auto' : 'none';
         }
         // Music section: show the player all at once (no gradual fade/scale)
         if (isNowMusicSection) {

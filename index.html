@@ -11,6 +11,10 @@
     
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="chainflow/fabicon.jpg">
+    <link rel="apple-touch-icon" href="chainflow/fabicon.jpg">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="application-name" content="ChainFlow">
+    <meta name="theme-color" content="#0B0D10">
 
     <!-- SEO / OGP -->
     <meta name="description" content="ChainFlowは、変幻するボーカルと疾走するビートで、クールな熱とキュートな輝きを同時に鳴らすAIミュージックユニット。">
@@ -20,17 +24,20 @@
     <meta property="og:title" content="ChainFlow">
     <meta property="og:description" content="ChainFlowは、変幻するボーカルと疾走するビートで、クールな熱とキュートな輝きを同時に鳴らすAIミュージックユニット。">
     <!-- Update to absolute URL on production (set to root-relative for local preview) -->
-    <meta property="og:url" content="/">
-    <meta property="og:image" content="/assets/ogp/og-image.jpg">
+    <meta property="og:url" content="https://namakel1010.github.io/cahinflow/">
+    <meta property="og:image" content="https://namakel1010.github.io/cahinflow/assets/ogp/og-image.jpg?v=20240923">
+    <meta property="og:image:secure_url" content="https://namakel1010.github.io/cahinflow/assets/ogp/og-image.jpg?v=20240923">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:alt" content="ChainFlowのテーマアートワーク">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ChainFlow">
     <meta name="twitter:description" content="ChainFlowは、変幻するボーカルと疾走するビートで、クールな熱とキュートな輝きを同時に鳴らすAIミュージックユニット。">
-    <meta name="twitter:image" content="/assets/ogp/og-image.jpg">
+    <meta name="twitter:image" content="https://namakel1010.github.io/cahinflow/assets/ogp/og-image.jpg?v=20240923">
+    <meta name="twitter:image:alt" content="ChainFlowのテーマアートワーク">
 </head>
 <body>
     <svg width="0" height="0" style="position:absolute">
@@ -239,6 +246,7 @@
         </div>
     </div>
     <audio id="audio-player" style="display:none;"></audio>
+    <script src="https://cdn.jsdelivr.net/npm/music-metadata-browser/dist/music-metadata-browser.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

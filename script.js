@@ -9,6 +9,8 @@ let contents = [];
 let lastChapterIndexVal = -1;
 let musicPlayerInitialized = false;
 let persistentPlayerDismissed = false;
+// Respect OS-level reduced motion preference (accessibility)
+const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const coolPlaylist = [
     { title: 'chainflow', artist: 'ChainFlow', file: 'works-cool/chainflow.wav' },
@@ -153,16 +155,22 @@ function applyTheme(themeName) {
 
     const artistImgSrc = (themeName === 'cute') ? cuteMedia.artist : coolMedia.artist;
     contents[4] = `<div class="flex flex-col items-center justify-center"><img src="${artistImgSrc}" alt="Artist Photo" class="rounded-lg shadow-2xl shadow-amethyst/20" style="border: 2px solid; border-image-slice: 1; max-height: 60vh;" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/400x600/0B0D10/F3F1EC?text=Error';"><h3 class="mt-6 primary-gradient-text" style="font-family: 'Marcellus', serif; font-size: 1.75rem; letter-spacing: 0.1em;">ChainFlow</h3></div>`;
-    
+
     const playlist = (themeName === 'cute') ? cutePlaylist : coolPlaylist;
     contents[6] = createMusicPlayerHTML(playlist);
 
     lastChapterIndexVal = -1; // Force content refresh
     musicPlayerInitialized = false; // Reset music player initialization flag when theme changes
-    
+
     if (websiteInitialized) {
         app.createLayers();
         app.updateOnScroll(window.scrollY);
+    }
+
+    // Keep the persistent player's album art in sync with the theme
+    const persistentArt = document.querySelector('.album-art-persistent');
+    if (persistentArt) {
+        persistentArt.src = artistImgSrc;
     }
 }
 
@@ -181,7 +189,7 @@ function updateThemeSegmentActive() {
 // ==============================================
 function typeWriter(element, text, speed) {
     return new Promise(resolve => {
-        element.innerHTML = ''; 
+        element.innerHTML = '';
         const chars = text.split('');
         let completedChars = 0;
         chars.forEach((char, index) => {
@@ -245,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingScreen = document.getElementById('loading-screen');
     const progressBar = document.getElementById('progress-bar');
     const percentageText = document.getElementById('loading-percentage');
-    
+
     let progress = 0;
     // Fake a quick loading animation
     const interval = setInterval(() => {
@@ -253,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (progress > 100) progress = 100;
         progressBar.style.width = `${progress}%`;
         percentageText.textContent = `${progress}%`;
-        
+
         if (progress >= 100) {
             clearInterval(interval);
             setTimeout(() => {
@@ -318,11 +326,13 @@ if (themeSegment) {
 // ==============================================
 function startBeatAnimation() {
     if (beatAnimationId || !feTurbulence) return;
+    // Skip the heavy noise animation for users preferring reduced motion
+    if (prefersReducedMotion) return;
 
     let startTime = performance.now();
     function animateBeat(currentTime) {
         const elapsed = currentTime - startTime;
-        
+
         const beat1 = Math.abs(Math.sin(elapsed * 0.008)) * 0.8;
         const beat2 = Math.abs(Math.sin(elapsed * 0.003)) * 0.2;
         const randomJitter = Math.random() * 0.1;
@@ -400,10 +410,12 @@ function createMusicPlayerHTML(playlist) {
         </li>
     `).join('');
 
+    const albumArtSrc = (currentTheme === 'cute') ? cuteMedia.artist : coolMedia.artist;
+
     return `
         <div class="music-player">
             <div class="track-info">
-                <img src="https://placehold.co/120x120/1a1a2e/e0e0e0?text=Album+Art" alt="Album Art" class="album-art" loading="lazy">
+                <img src="${albumArtSrc}" alt="ChainFlow アルバムアート" class="album-art" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/120x120/1a1a2e/e0e0e0?text=Album+Art';">
                 <div>
                     <h3 class="title">曲を選んでください</h3>
                     <p class="artist">リストから曲を選択して再生</p>
@@ -517,7 +529,7 @@ function initializeMusicEngine() {
         musicEngine.currentTrackIndex = trackIndex;
         musicEngine.audioPlayer.src = encodeURI(trackData.file);
         musicEngine.audioPlayer.load();
-        playTrack(); 
+        playTrack();
     };
 
     const nextTrack = () => {
@@ -529,7 +541,7 @@ function initializeMusicEngine() {
         const newIndex = (musicEngine.currentTrackIndex - 1 + musicEngine.playlist.length) % musicEngine.playlist.length;
         loadTrack(newIndex);
     };
-    
+
     const setVolume = (volume) => {
         const v = Math.min(1, Math.max(0, parseFloat(volume)));
         musicEngine.audioPlayer.volume = v;
@@ -688,7 +700,7 @@ function updateAllPlayerUIs() {
         mainPlayer.querySelector('#total-duration').textContent = formatTime(duration);
         mainPlayer.querySelector('#progress-bar-player').style.width = `${progressPercent}%`;
         mainPlayer.querySelector('#volume-slider').value = volume;
-        
+
         musicEngine.trackItems.forEach((item, index) => {
             item.classList.toggle('active', index === currentTrackIndex);
             const durationEl = item.querySelector('.track-duration');
@@ -709,6 +721,12 @@ function updateAllPlayerUIs() {
         persistentPlayer.querySelector('#current-time-persistent').textContent = formatTime(currentTime);
         persistentPlayer.querySelector('#total-duration-persistent').textContent = formatTime(duration);
         persistentPlayer.querySelector('#volume-slider-persistent').value = volume;
+        // Keep album art in sync with the current theme's artwork
+        const artEl = persistentPlayer.querySelector('.album-art-persistent');
+        if (artEl) {
+            const artSrc = (currentTheme === 'cute') ? cuteMedia.artist : coolMedia.artist;
+            if (artEl.getAttribute('src') !== artSrc) artEl.src = artSrc;
+        }
     }
 }
 
@@ -720,7 +738,7 @@ function updateAllPlayerUIs() {
 function initializeWebsite() {
     websiteInitialized = true;
     initializeMusicEngine(); // Initialize the core audio logic once.
-    
+
     feTurbulence = document.querySelector('#beat-noise-filter feTurbulence');
     feDisplacementMap = document.querySelector('#beat-noise-filter feDisplacementMap');
 
@@ -735,11 +753,11 @@ function initializeWebsite() {
 
     class Particle {
         constructor(x, y, dX, dY, size) { this.x = x; this.y = y; this.directionX = dX; this.directionY = dY; this.size = size; }
-        draw() { 
-            ctx.beginPath(); 
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); 
-            ctx.fillStyle = themeConfig[currentTheme].particleColor; 
-            ctx.fill(); 
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+            ctx.fillStyle = themeConfig[currentTheme].particleColor;
+            ctx.fill();
         }
         update() {
             if (this.x > canvas.width || this.x < 0) { this.directionX = -this.directionX; }
@@ -804,7 +822,7 @@ function initializeWebsite() {
         { baseX: -20, baseY: -40 }, { baseX: 25,  baseY: 45  }, { baseX: -55, baseY: 65  },
         { baseX: 60,  baseY: 0   }
     ];
-    
+
     app.createLayers = function() {
         zoomContainer.innerHTML = '';
         layerData = [];
@@ -813,7 +831,7 @@ function initializeWebsite() {
         let mediaPositionIndex = 0;
         const layerTypes = Array(numLayers).fill(0);
         // Reduce number of illustration squares to about half
-        const mediaCount = 5; 
+        const mediaCount = 5;
         for(let i = 0; i < mediaCount; i++) { layerTypes[i] = 1; }
         for (let i = layerTypes.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -825,7 +843,7 @@ function initializeWebsite() {
             const depth = i * 100;
             let size, baseX, baseY;
             if (layerTypes[i] === 1) {
-                size = Math.min(window.innerWidth * 0.6, 750); 
+                size = Math.min(window.innerWidth * 0.6, 750);
                 layerEl.style.width = `${size}px`;
                 layerEl.style.height = `${size}px`;
                 layerEl.style.border = '1px solid rgba(128, 128, 128, 0.2)';
@@ -847,10 +865,10 @@ function initializeWebsite() {
 
                 const baseSize = Math.min(window.innerWidth * 0.4, 200);
                 size = (Math.random() > 0.5) ? baseSize * (1.8 + Math.random() * 0.4) : baseSize * (0.4 + Math.random() * 0.2);
-                
+
                 layerEl.style.width = `${size}px`;
                 layerEl.style.height = `${size}px`;
-                
+
                 let deadZoneX = 30, deadZoneY = 30;
 
                 if (currentTheme === 'cute') {
@@ -859,7 +877,7 @@ function initializeWebsite() {
                     const cuteColors = ['--cute-pink', '--cute-salmon', '--cute-mauve', '--cute-brown'];
                     const randomColorVar = cuteColors[Math.floor(Math.random() * cuteColors.length)];
                     const colorValue = getComputedStyle(document.documentElement).getPropertyValue(randomColorVar).trim();
-                    
+
                     const svgNS = "http://www.w3.org/2000/svg";
                     const svg = document.createElementNS(svgNS, "svg");
                     svg.setAttribute("viewBox", "0 0 24 24");
@@ -877,7 +895,7 @@ function initializeWebsite() {
                         shape = document.createElementNS(svgNS, "circle");
                         shape.setAttribute("cx", "12"); shape.setAttribute("cy", "12"); shape.setAttribute("r", "10");
                     }
-                    
+
                     shape.setAttribute("fill", "none"); shape.setAttribute("stroke", colorValue);
                     shape.setAttribute("stroke-width", "0.1"); shape.setAttribute("stroke-linecap", "round"); shape.setAttribute("stroke-linejoin", "round");
                     svg.appendChild(shape);
@@ -895,7 +913,7 @@ function initializeWebsite() {
                         layerEl.style.borderWidth = `${Math.random() * 2 + 1}px`;
                     }
                 }
-                
+
                 const fullRangeX = 65, fullRangeY = 65;
                 baseX = (Math.random() - 0.5) * 2 * fullRangeX;
                 baseY = (Math.random() - 0.5) * 2 * fullRangeY;
@@ -933,18 +951,18 @@ function initializeWebsite() {
     const totalPagesEl = document.getElementById('total-pages');
     const bottomFade = document.getElementById('bottom-fade');
     const endingCurtain = document.getElementById('ending-curtain');
-    
+
     const menuButton = document.querySelector('.menu-container');
     const menuOverlay = document.getElementById('menu-overlay');
     const closeMenuBtn = document.getElementById('close-menu-btn');
     const menuLinks = Array.from(document.querySelectorAll('.menu-link')); // Use Array.from for easier manipulation
     let lastFocusedElement; // For accessibility
-    
+
     const scrollButton = document.getElementById('scroll-button');
     const scrollButtonIcon = document.getElementById('scroll-button-icon');
     const downArrowSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m-7-7l7 7 7-7"/></svg>`;
     const upArrowSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
-    
+
     totalPagesEl.textContent = `/ ${String(contents.length + 1).padStart(2, '0')}`;
 
     // Viewport helpers to stabilize mobile URL bar behavior
@@ -973,12 +991,12 @@ function initializeWebsite() {
                 const t = (progressInChapter - 0.1) / 0.2;
                 textOpacity = t;
                 textScale = 0.5 + t * 0.5;
-            } 
+            }
             // Fully visible: 30% -> 70%
             else if (progressInChapter > 0.3 && progressInChapter <= 0.7) {
                 textOpacity = 1;
                 textScale = 1.0;
-            } 
+            }
             // Fade out: 70% -> 90%
             else if (progressInChapter > 0.7 && progressInChapter < 0.9) {
                 const t = (progressInChapter - 0.7) / 0.2;
@@ -1037,7 +1055,7 @@ function initializeWebsite() {
 
         // Update page indicator and other UI elements
         currentPageEl.textContent = String(Math.min(contents.length + 1, visualChapterIndex + 1)).padStart(2, '0');
-        
+
         const isNowMusicSection = (visualChapterIndex === 6);
         isMusicSectionActive = isNowMusicSection;
         // Toggle stronger background muting when the music player is visible
@@ -1128,10 +1146,10 @@ function initializeWebsite() {
         textContent.style.transform = `translate(-50%, -50%) scale(${textScale})`;
         textContent.style.transformOrigin = 'center center';
     }
-    
+
     function onScroll() {
         const currentScrollY = window.scrollY;
-        
+
         if (!ticking) {
             window.requestAnimationFrame(() => {
                 app.updateOnScroll(currentScrollY);
@@ -1206,7 +1224,7 @@ function initializeWebsite() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
-        
+
         let nextSectionIndex = -1;
         for(const index of sectionStartIndexes) {
             if (index > visualChapterIndex) {
@@ -1214,7 +1232,7 @@ function initializeWebsite() {
                 break;
             }
         }
-        
+
         let targetScroll;
         if (nextSectionIndex !== -1) {
             if (nextSectionIndex === contents.length) {
@@ -1239,7 +1257,7 @@ function initializeWebsite() {
         mouse.y = -(t.clientY / getViewportHeight()) * 2 + 1;
     }, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
-    
+
     let resizeTimeout;
     function updateLayoutDimensions() {
         const vw = getViewportWidth();

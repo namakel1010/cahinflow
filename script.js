@@ -1268,6 +1268,11 @@ function initializeWebsite() {
                 textScale = 1.0 + t * 2.0;
             }
         }
+        // Chapter 0 (hero): visible immediately on page load, no fade-in delay
+        if (visualChapterIndex === 0 && progressInChapter <= 0.3) {
+            textOpacity = 1;
+            textScale = 1.0;
+        }
         textOpacity = Math.max(0, Math.min(1, textOpacity));
         textScale = Math.max(0, textScale);
 

@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Immersive Artist Reveal with Theme Switcher</title>
+    <title>ChainFlow | AIミュージックユニット公式サイト</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;500&family=Marcellus&family=Noto+Sans+JP:wght@300;400;700&family=Cormorant+Garamond:wght@300;400&family=Zen+Old+Mincho:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
-    
+
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="chainflow/fabicon.jpg">
     <link rel="apple-touch-icon" href="chainflow/fabicon.jpg">
     <link rel="manifest" href="manifest.webmanifest">
+    <link rel="canonical" href="https://namakel1010.github.io/cahinflow/">
     <meta name="application-name" content="ChainFlow">
     <meta name="theme-color" content="#0B0D10">
 
@@ -38,6 +39,35 @@
     <meta name="twitter:description" content="ChainFlowは、変幻するボーカルと疾走するビートで、クールな熱とキュートな輝きを同時に鳴らすAIミュージックユニット。">
     <meta name="twitter:image" content="https://namakel1010.github.io/cahinflow/assets/ogp/og-image.jpg?v=20240923">
     <meta name="twitter:image:alt" content="ChainFlowのテーマアートワーク">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "MusicGroup",
+        "name": "ChainFlow",
+        "url": "https://namakel1010.github.io/cahinflow/",
+        "image": "https://namakel1010.github.io/cahinflow/assets/ogp/og-image.jpg",
+        "description": "ChainFlowは、変幻するボーカルと疾走するビートで、クールな熱とキュートな輝きを同時に鳴らすAIミュージックユニット。",
+        "member": [
+            { "@type": "Person", "name": "コンガ", "roleName": "DJ" },
+            { "@type": "Person", "name": "蛇ノ目", "roleName": "Vocal" },
+            { "@type": "Person", "name": "岩爺", "roleName": "Rap" }
+        ]
+    }
+    </script>
+
+    <!-- Accessibility: respect reduced motion preference -->
+    <style>
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <svg width="0" height="0" style="position:absolute">
@@ -72,7 +102,7 @@
                     <circle cx="18" cy="16" r="3"/>
                 </svg>
             </button>
-            
+
             <!-- Segmented theme toggle -->
             <div id="theme-segment" class="theme-segment" role="tablist" aria-label="テーマ切替">
                 <button class="seg-item" role="tab" aria-selected="true" data-theme="cool" tabindex="0">
@@ -175,24 +205,24 @@
         </div>
     </div>
 
-    
-    
+
+
     <canvas id="particle-canvas"></canvas>
     <div id="theme-morph" class="theme-morph" aria-hidden="true"></div>
     <div id="music-notes-container"></div>
     <div id="zoom-container"></div>
-    
+
     <div id="text-display-area">
         <div id="text-content"></div>
     </div>
-    
+
     <main id="scroll-container" class="relative z-10"></main>
 
     <div id="page-indicator">
         <span id="current-page" class="current-page primary-gradient-text">01</span>
         <span id="total-pages" class="total-pages">/ 10</span>
     </div>
-    
+
     <button id="scroll-button">
         <div id="scroll-button-icon"></div>
     </button>
@@ -212,7 +242,7 @@
             </svg>
         </button>
         <div class="persistent-player-content">
-            <img src="https://placehold.co/60x60/1a1a2e/e0e0e0?text=Art" alt="Album Art" class="album-art-persistent">
+            <img src="chainflow/artist1.jpg" alt="ChainFlow アルバムアート" class="album-art-persistent" onerror="this.onerror=null;this.src='https://placehold.co/60x60/1a1a2e/e0e0e0?text=Art';">
             <div class="track-info-persistent">
                 <h4 class="title-persistent">No Music Playing</h4>
                 <p class="artist-persistent"></p>

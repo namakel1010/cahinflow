@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChainFlow | AIミュージックユニット公式サイト</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;500&family=Marcellus&family=Noto+Sans+JP:wght@300;400;700&family=Cormorant+Garamond:wght@300;400&family=Zen+Old+Mincho:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Poppins:wght@300;500&family=Noto+Sans+JP:wght@300;400;700&family=Zen+Old+Mincho:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css">
     <link rel="icon" href="chainflow/fabicon.jpg">
     <link rel="apple-touch-icon" href="chainflow/fabicon.jpg">
     <link rel="manifest" href="manifest.webmanifest">
@@ -24,7 +23,6 @@
     <meta property="og:site_name" content="ChainFlow">
     <meta property="og:title" content="ChainFlow">
     <meta property="og:description" content="ChainFlowは、変幻するボーカルと疾走するビートで、クールな熱とキュートな輝きを同時に鳴らすAIミュージックユニット。">
-    <!-- Update to absolute URL on production (set to root-relative for local preview) -->
     <meta property="og:url" content="https://namakel1010.github.io/cahinflow/">
     <meta property="og:image" content="https://namakel1010.github.io/cahinflow/assets/ogp/og-image.jpg?v=20240923">
     <meta property="og:image:secure_url" content="https://namakel1010.github.io/cahinflow/assets/ogp/og-image.jpg?v=20240923">
@@ -32,15 +30,12 @@
     <meta property="og:image:height" content="630">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:alt" content="ChainFlowのテーマアートワーク">
-
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ChainFlow">
     <meta name="twitter:description" content="ChainFlowは、変幻するボーカルと疾走するビートで、クールな熱とキュートな輝きを同時に鳴らすAIミュージックユニット。">
     <meta name="twitter:image" content="https://namakel1010.github.io/cahinflow/assets/ogp/og-image.jpg?v=20240923">
     <meta name="twitter:image:alt" content="ChainFlowのテーマアートワーク">
 
-    <!-- Structured Data -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -57,8 +52,391 @@
     }
     </script>
 
-    <!-- Site polish: hero, typography, links, header readability -->
     <style>
+        /* ==============================
+           Theme tokens
+        ============================== */
+        :root {
+            --gold-1: #BF953F; --gold-2: #FCF6BA; --gold-3: #B38728; --gold-4: #FBF5B7; --gold-5: #AA771C;
+            --grad: linear-gradient(135deg, var(--gold-1), var(--gold-2), var(--gold-3), var(--gold-4), var(--gold-5));
+
+            --bg: #0B0D10;
+            --bg-2: #12151c;
+            --panel: rgba(255, 255, 255, 0.04);
+            --panel-border: rgba(255, 255, 255, 0.09);
+            --text: #F3F1EC;
+            --text-sub: #b9b5ad;
+            --accent: #6D4BAE;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --font-jp: 'Zen Old Mincho', serif;
+            --font-display: 'Marcellus', serif;
+            --font-base: 'Noto Sans JP', sans-serif;
+        }
+        [data-theme="cute"] {
+            --grad: linear-gradient(135deg, #C03E5D, #D56D7A, #B883A1, #D56D7A, #C03E5D);
+            --bg: #FFF5F6;
+            --bg-2: #ffecef;
+            --panel: rgba(255, 255, 255, 0.72);
+            --panel-border: rgba(192, 62, 93, 0.16);
+            --text: #5E3A3A;
+            --text-sub: #a3767d;
+            --accent: #D56D7A;
+            --shadow: rgba(192, 62, 93, 0.18);
+            --font-jp: 'M PLUS Rounded 1c', sans-serif;
+        }
+
+        /* ==============================
+           Base
+        ============================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-base);
+            line-height: 1.9;
+            overflow-x: hidden;
+            transition: background 0.6s ease, color 0.6s ease;
+        }
+        img { max-width: 100%; display: block; }
+        a { color: inherit; text-decoration: none; }
+
+        .grad-text {
+            background: var(--grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .eyebrow {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.5em;
+            text-indent: 0.5em;
+            text-transform: uppercase;
+            color: var(--text-sub);
+        }
+
+        /* ==============================
+           Ambient canvas
+        ============================== */
+        #fx {
+            position: fixed; inset: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ==============================
+           Header
+        ============================== */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.9rem clamp(1rem, 4vw, 3rem);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            background: color-mix(in srgb, var(--bg) 55%, transparent);
+            border-bottom: 1px solid var(--panel-border);
+            z-index: 50;
+            transition: background 0.6s ease;
+        }
+        .brand {
+            font-family: var(--font-display);
+            font-size: 1.35rem;
+            letter-spacing: 0.08em;
+        }
+        .nav-links { display: flex; gap: 1.8rem; align-items: center; }
+        .nav-links a {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.28em;
+            color: var(--text-sub);
+            transition: color 0.25s ease;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .theme-pill {
+            display: flex; align-items: center; gap: 0;
+            border: 1px solid var(--panel-border);
+            border-radius: 999px;
+            overflow: hidden;
+            background: var(--panel);
+        }
+        .theme-pill button {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.66rem;
+            letter-spacing: 0.24em;
+            padding: 0.45rem 0.95rem;
+            background: transparent;
+            color: var(--text-sub);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .theme-pill button.on {
+            background: var(--grad);
+            color: #0B0D10;
+            font-weight: 600;
+        }
+        [data-theme="cute"] .theme-pill button.on { color: #fff; }
+
+        /* ==============================
+           Hero
+        ============================== */
+        .hero {
+            position: relative;
+            min-height: 100svh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center;
+            padding: 6rem 1.5rem 4rem;
+            isolation: isolate;
+            overflow: hidden;
+        }
+        .hero-art {
+            position: absolute; inset: 0; z-index: -2;
+            background-size: cover;
+            background-position: center 22%;
+            opacity: 0.34;
+            transition: opacity 0.8s ease, background-image 0.3s ease;
+        }
+        [data-theme="cute"] .hero-art { opacity: 0.28; }
+        .hero-veil {
+            position: absolute; inset: 0; z-index: -1;
+            background:
+                radial-gradient(ellipse 90% 60% at 50% 42%, transparent 0%, var(--bg) 92%),
+                linear-gradient(to bottom, color-mix(in srgb, var(--bg) 40%, transparent), var(--bg) 96%);
+            transition: background 0.6s ease;
+        }
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(3.6rem, 11vw, 8.5rem);
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            line-height: 1.05;
+        }
+        .hero .tagline {
+            margin-top: 1.4rem;
+            font-family: var(--font-jp);
+            font-size: clamp(1rem, 1.9vw, 1.35rem);
+            letter-spacing: 0.18em;
+        }
+        .hero .cta-row {
+            margin-top: 2.8rem;
+            display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+        }
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.55rem;
+            font-family: var(--font-base);
+            font-size: 0.92rem;
+            letter-spacing: 0.12em;
+            padding: 0.9rem 2.1rem;
+            border-radius: 999px;
+            border: 1px solid var(--panel-border);
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 12px 30px var(--shadow); }
+        .btn-primary { background: var(--grad); color: #0B0D10; font-weight: 700; border: none; }
+        [data-theme="cute"] .btn-primary { color: #fff; }
+        .btn-ghost { background: var(--panel); color: var(--text); }
+        .scroll-hint {
+            position: absolute; bottom: 2rem; left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.62rem; letter-spacing: 0.5em; text-indent: 0.5em;
+            color: var(--text-sub);
+            animation: bob 2.4s ease-in-out infinite;
+        }
+        @keyframes bob { 0%,100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 8px); } }
+
+        /* ==============================
+           Sections
+        ============================== */
+        section { position: relative; z-index: 1; }
+        .wrap { max-width: 1080px; margin: 0 auto; padding: clamp(4.5rem, 9vw, 8rem) 1.5rem; }
+        .sec-head { text-align: center; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+        .sec-head h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 400;
+            letter-spacing: 0.14em;
+            margin-top: 0.6rem;
+        }
+
+        /* About */
+        .about-copy {
+            max-width: 640px; margin: 0 auto;
+            text-align: center;
+            font-family: var(--font-jp);
+            font-size: clamp(1rem, 1.6vw, 1.18rem);
+            letter-spacing: 0.06em;
+        }
+        .members {
+            margin-top: clamp(2.6rem, 5vw, 4rem);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.2rem;
+        }
+        .member {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 2.2rem 1.8rem;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .member:hover { transform: translateY(-6px); box-shadow: 0 18px 40px var(--shadow); }
+        .member .role {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.68rem; letter-spacing: 0.4em; text-indent: 0.4em;
+            color: var(--text-sub);
+        }
+        .member .m-name {
+            font-family: var(--font-jp);
+            font-size: 1.9rem;
+            margin: 0.5rem 0 0.7rem;
+            font-weight: 700;
+        }
+        .member p { font-size: 0.92rem; color: var(--text-sub); line-height: 2; }
+        .about-close {
+            margin-top: clamp(2.6rem, 5vw, 4rem);
+            text-align: center;
+            font-family: var(--font-jp);
+            font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+            letter-spacing: 0.1em;
+        }
+
+        /* Works / player */
+        .player {
+            display: grid;
+            grid-template-columns: minmax(220px, 340px) 1fr;
+            gap: clamp(1.5rem, 3vw, 2.8rem);
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 26px;
+            padding: clamp(1.4rem, 3vw, 2.4rem);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 24px 60px var(--shadow);
+        }
+        .cover-box { position: relative; }
+        .cover-box img {
+            width: 100%; aspect-ratio: 1; object-fit: cover;
+            border-radius: 18px;
+            box-shadow: 0 14px 36px var(--shadow);
+        }
+        .cover-box img.spin { animation: pulse 2.4s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.015); } }
+        .now-title { font-family: var(--font-jp); font-size: 1.5rem; font-weight: 700; line-height: 1.4; }
+        .now-artist { color: var(--text-sub); font-size: 0.85rem; letter-spacing: 0.2em; margin-top: 0.15rem; }
+        .controls { display: flex; align-items: center; gap: 1rem; margin-top: 1.2rem; }
+        .ctl {
+            width: 46px; height: 46px; border-radius: 50%;
+            display: grid; place-items: center;
+            background: transparent; border: 1px solid var(--panel-border);
+            color: var(--text); cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .ctl:hover { transform: scale(1.08); }
+        .ctl.play {
+            width: 62px; height: 62px;
+            background: var(--grad); border: none; color: #0B0D10;
+        }
+        [data-theme="cute"] .ctl.play { color: #fff; }
+        .ctl svg { width: 20px; height: 20px; fill: currentColor; }
+        .ctl.play svg { width: 24px; height: 24px; }
+        .timeline { margin-top: 1.1rem; }
+        .rail {
+            height: 6px; border-radius: 3px;
+            background: color-mix(in srgb, var(--text) 14%, transparent);
+            cursor: pointer; position: relative; overflow: hidden;
+        }
+        .rail .fill { position: absolute; inset: 0 100% 0 0; background: var(--grad); border-radius: 3px; }
+        .times { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-sub); margin-top: 0.4rem; letter-spacing: 0.1em; }
+        .tracklist { margin-top: 1.3rem; max-height: 300px; overflow-y: auto; scrollbar-width: thin; }
+        .track {
+            display: flex; align-items: center; gap: 0.9rem;
+            padding: 0.65rem 0.8rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .track:hover { background: color-mix(in srgb, var(--text) 7%, transparent); }
+        .track.on { background: color-mix(in srgb, var(--text) 10%, transparent); }
+        .track .no { font-family: 'Poppins', sans-serif; font-size: 0.72rem; color: var(--text-sub); width: 1.4em; }
+        .track.on .no { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
+        .track .t-title { font-size: 0.95rem; font-family: var(--font-jp); }
+        .track .eq { margin-left: auto; display: none; gap: 2.5px; align-items: flex-end; height: 14px; }
+        .track.on.playing .eq { display: flex; }
+        .track .eq i { width: 3px; background: var(--accent); border-radius: 2px; animation: eq 0.9s ease-in-out infinite; }
+        .track .eq i:nth-child(1) { height: 60%; animation-delay: 0s; }
+        .track .eq i:nth-child(2) { height: 100%; animation-delay: 0.2s; }
+        .track .eq i:nth-child(3) { height: 40%; animation-delay: 0.4s; }
+        @keyframes eq { 0%,100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+        .follow-line { margin-top: 1.2rem; font-size: 0.8rem; color: var(--text-sub); }
+        .follow-line a { border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+        .follow-line a:hover { color: var(--text); }
+
+        /* Gallery */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.9rem;
+        }
+        .gallery figure {
+            border-radius: 18px; overflow: hidden;
+            aspect-ratio: 1;
+            border: 1px solid var(--panel-border);
+        }
+        .gallery img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+        .gallery figure:hover img { transform: scale(1.06); }
+
+        /* Links */
+        .links-grid2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        .link-card {
+            display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+            padding: 2rem 1rem 1.7rem;
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 18px;
+            backdrop-filter: blur(8px);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        a.link-card:hover { transform: translateY(-5px); box-shadow: 0 16px 36px var(--shadow); }
+        .link-card .lp {
+            font-family: var(--font-display);
+            font-size: 1.05rem; letter-spacing: 0.18em;
+        }
+        .link-card .arrow { font-size: 0.8rem; color: var(--text-sub); }
+        .link-card.soon { opacity: 0.42; }
+        .link-card.soon .arrow { font-size: 0.58rem; letter-spacing: 0.3em; }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--panel-border);
+            text-align: center;
+            padding: 3rem 1.5rem 3.4rem;
+            position: relative; z-index: 1;
+        }
+        footer .f-logo { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 0.1em; }
+        footer p { margin-top: 0.7rem; font-size: 0.72rem; letter-spacing: 0.25em; color: var(--text-sub); }
+
+        /* Reveal on scroll */
+        .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.9s ease, transform 0.9s ease; }
+        .reveal.in { opacity: 1; transform: none; }
+
+        @media (max-width: 760px) {
+            .nav-links a:not(.keep) { display: none; }
+            .player { grid-template-columns: 1fr; }
+            .cover-box { max-width: 300px; margin: 0 auto; }
+        }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -67,300 +445,369 @@
                 scroll-behavior: auto !important;
             }
         }
-
-        /* --- Hero (chapter 0) --- */
-        .hero-wrap { text-align: center; }
-        .hero-eyebrow {
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.8rem;
-            letter-spacing: 0.55em;
-            text-indent: 0.55em;
-            opacity: 0.75;
-            margin-bottom: 1.1rem;
-            text-transform: uppercase;
-        }
-        .hero-logo {
-            font-family: 'Marcellus', serif;
-            font-size: clamp(3.2rem, 9vw, 6.5rem);
-            letter-spacing: 0.06em;
-            line-height: 1.1;
-            font-weight: 400;
-        }
-        .hero-tagline {
-            margin-top: 1.3rem;
-            font-family: var(--font-family-jp);
-            font-size: clamp(0.95rem, 1.6vw, 1.25rem);
-            letter-spacing: 0.14em;
-            opacity: 0.9;
-        }
-
-        /* --- About typography --- */
-        .about-lead {
-            display: block;
-            font-family: 'Marcellus', var(--font-family-serif), serif;
-            font-size: clamp(1.7rem, 3.4vw, 2.6rem);
-            letter-spacing: 0.08em;
-            line-height: 1.3;
-            margin-bottom: 0.6em;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .about-body {
-            font-size: clamp(1.02rem, 1.5vw, 1.25rem);
-            line-height: 2.15;
-            letter-spacing: 0.05em;
-        }
-        .em-grad {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
-        }
-
-        /* --- Header logo readability over background imagery --- */
-        .header-logo { text-shadow: 0 1px 14px rgba(11, 13, 16, 0.45); }
-        [data-theme="cute"] .header-logo {
-            text-shadow: 0 1px 10px rgba(255, 255, 255, 0.85), 0 1px 18px rgba(255, 255, 255, 0.6);
-        }
-
-        /* --- Links polish --- */
-        .links-grid .link-button {
-            opacity: 0.92;
-            border-radius: 14px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-            transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
-        }
-        .links-grid .link-button:hover {
-            transform: translateY(-4px) scale(1.04);
-            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
-            opacity: 1;
-        }
-        .link-button.is-disabled { opacity: 0.38; cursor: default; }
-        .link-button.is-disabled:hover {
-            transform: none;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-            opacity: 0.38;
-        }
-        .soon-badge {
-            display: block;
-            font-size: 0.55rem;
-            letter-spacing: 0.18em;
-            opacity: 0.85;
-            margin-top: 0.35em;
-        }
     </style>
 </head>
 <body>
-    <svg width="0" height="0" style="position:absolute">
-        <defs>
-            <linearGradient id="primary-gradient-svg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" class="grad-stop-1" />
-                <stop offset="25%" class="grad-stop-2" />
-                <stop offset="50%" class="grad-stop-3" />
-                <stop offset="75%" class="grad-stop-4" />
-                <stop offset="100%" class="grad-stop-5" />
-            </linearGradient>
-            <filter id="beat-noise-filter">
-                <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch" result="noise"/>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="B"/>
-            </filter>
-        </defs>
-    </svg>
+    <canvas id="fx" aria-hidden="true"></canvas>
 
-    <header class="header">
-        <a href="#" class="header-logo primary-gradient-text">ChainFlow</a>
-        <div class="header-right-controls">
-            <!-- Player icon (left of theme segment), shown only when dismissed -->
-            <button id="restore-player-btn" class="header-icon-btn" aria-label="プレイヤーを表示" title="プレイヤー表示" style="display:none">
-                <!-- Cool: Play icon -->
-                <svg class="icon-restore-cool" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-                <!-- Cute: Musical note icon -->
-                <svg class="icon-restore-cute" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 18V5l12-2v9"/>
-                    <circle cx="6" cy="18" r="3"/>
-                    <circle cx="18" cy="16" r="3"/>
-                </svg>
-            </button>
-
-            <!-- Segmented theme toggle -->
-            <div id="theme-segment" class="theme-segment" role="tablist" aria-label="テーマ切替">
-                <button class="seg-item" role="tab" aria-selected="true" data-theme="cool" tabindex="0">
-                    <svg class="seg-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l4-4h10l4 4-9 14-9-14z"/><path d="M3 7h18"/><path d="M7 7l5 14"/><path d="M17 7l-5 14"/></svg>
-                    <span class="seg-label">ＣＯＯＬ</span>
-                </button>
-                <span class="seg-divider">|</span>
-                <button class="seg-item" role="tab" aria-selected="false" data-theme="cute" tabindex="-1">
-                    <svg class="seg-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5 5 0 0 0-7.1 0L12 6.3l-1.7-1.7a5 5 0 1 0-7.1 7.1l1.7 1.7L12 21l7.1-7.6 1.7-1.7a5 5 0 0 0 0-7.1z"/></svg>
-                    <span class="seg-label">ＣＵＴＥ</span>
-                </button>
+    <header class="nav">
+        <a class="brand grad-text" href="#top">ChainFlow</a>
+        <nav class="nav-links" aria-label="サイト内リンク">
+            <a href="#about">ABOUT</a>
+            <a href="#works">WORKS</a>
+            <a href="#gallery">GALLERY</a>
+            <a href="#links">LINKS</a>
+            <div class="theme-pill keep" role="tablist" aria-label="テーマ切替">
+                <button id="btn-cool" role="tab" aria-selected="true">COOL</button>
+                <button id="btn-cute" role="tab" aria-selected="false">CUTE</button>
             </div>
-            <div id="theme-seg-tip" class="seg-tip" aria-hidden="true">ここでテーマを切替</div>
-            <div class="menu-container">
-                <span class="menu-text primary-gradient-text">MENU</span>
-                <button class="hamburger-menu">
-                    <span class="line"></span>
-                    <span class="line"></span>
-                    <span class="line"></span>
-                </button>
-            </div>
-        </div>
+        </nav>
     </header>
 
-    <div id="menu-overlay" class="fixed inset-0 z-[1000] flex items-center justify-center">
-        <button id="close-menu-btn" class="absolute top-5 right-[5%] text-5xl font-light">×</button>
-        <nav>
-            <ul class="flex flex-col items-center gap-8 text-center" id="menu-list">
-                <li><a href="#about" class="menu-link" data-chapter="0">ABOUT</a></li>
-                <li><a href="#works" class="menu-link" data-chapter="5">WORKS</a></li>
-                <li><a href="#links" class="menu-link" data-chapter="7">LINKS</a></li>
-            </ul>
-        </nav>
-    </div>
+    <main id="top">
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-art" id="hero-art"></div>
+            <div class="hero-veil"></div>
+            <p class="eyebrow">AI MUSIC UNIT</p>
+            <h1 class="grad-text">ChainFlow</h1>
+            <p class="tagline" id="hero-tagline">AI時代のバーチャルミュージシャン</p>
+            <div class="cta-row">
+                <a class="btn btn-primary" href="#works">▶&ensp;音楽を聴く</a>
+                <a class="btn btn-ghost" href="https://suno.com/@namakel" target="_blank" rel="noopener noreferrer">SUNOでフォロー</a>
+            </div>
+            <div class="scroll-hint">SCROLL</div>
+        </section>
 
-    <!-- Theme Onboarding (first visit only) -->
-    <div id="theme-onboarding" class="onboarding-overlay" aria-hidden="true">
-        <div class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
-            <div class="onboarding-title" id="onboarding-title">テーマを選択</div>
-            <p class="onboarding-desc">はじめに表示テーマを選べます。後からいつでも切り替え可能です。</p>
-            <div class="preview-grid">
-                <div class="preview-card preview-cool">
-                    <div class="preview-title">ＣＯＯＬ</div>
-                    <div class="preview-sample">Aa あア｜タイポと配色のプレビュー</div>
-                    <div class="chip-row">
-                        <span class="chip" style="background:#0B0D10"></span>
-                        <span class="chip" style="background:#F3F1EC"></span>
-                        <span class="chip" style="background:#6D4BAE"></span>
-                        <span class="chip" style="background:#BF953F"></span>
+        <!-- ABOUT -->
+        <section id="about">
+            <div class="wrap">
+                <div class="sec-head reveal">
+                    <p class="eyebrow">WHO WE ARE</p>
+                    <h2 class="grad-text">ABOUT</h2>
+                </div>
+                <p class="about-copy reveal" id="about-copy">
+                    DAO発のキャラクタープロジェクト「クリプトニンジャ」から誕生し、プロデューサー namakel の手で磨き上げられた、AI時代のバーチャルミュージシャン。
+                </p>
+                <div class="members">
+                    <div class="member reveal">
+                        <p class="role">DJ</p>
+                        <p class="m-name grad-text">コンガ</p>
+                        <p id="m1-desc">ビートで鼓動を打つ</p>
+                    </div>
+                    <div class="member reveal">
+                        <p class="role">VOCAL</p>
+                        <p class="m-name grad-text">蛇ノ目</p>
+                        <p id="m2-desc">艶やかな息遣いで夜を染める</p>
+                    </div>
+                    <div class="member reveal">
+                        <p class="role">RAP</p>
+                        <p class="m-name grad-text">岩爺</p>
+                        <p id="m3-desc">深みと余韻を刻む</p>
                     </div>
                 </div>
-                <div class="preview-card preview-cute">
-                    <div class="preview-title">ＣＵＴＥ</div>
-                    <div class="preview-sample">Aa あア｜タイポと配色のプレビュー</div>
-                    <div class="chip-row">
-                        <span class="chip" style="background:#FEF9F9"></span>
-                        <span class="chip" style="background:#5E3A3A"></span>
-                        <span class="chip" style="background:#D56D7A"></span>
-                        <span class="chip" style="background:#B883A1"></span>
+                <p class="about-close reveal" id="about-close">
+                    変幻する歌声、AIが紡ぐアレンジとメロディ。<br>その重なりが描く未来を、あなたも目撃してほしい。
+                </p>
+            </div>
+        </section>
+
+        <!-- WORKS -->
+        <section id="works">
+            <div class="wrap">
+                <div class="sec-head reveal">
+                    <p class="eyebrow">LISTEN</p>
+                    <h2 class="grad-text">WORKS</h2>
+                </div>
+                <div class="player reveal">
+                    <div class="cover-box">
+                        <img id="cover" src="assets/playlists/cool.jpg" alt="ChainFlow アルバムアート"
+                             onerror="this.onerror=null;this.src='chainflow/artist1.jpg';">
+                    </div>
+                    <div>
+                        <p class="now-title" id="now-title">—</p>
+                        <p class="now-artist">ChainFlow</p>
+                        <div class="controls">
+                            <button class="ctl" id="prev" aria-label="前の曲">
+                                <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                            </button>
+                            <button class="ctl play" id="play" aria-label="再生 / 一時停止">
+                                <svg viewBox="0 0 24 24" id="ic-play"><path d="M8 5v14l11-7z"/></svg>
+                                <svg viewBox="0 0 24 24" id="ic-pause" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+                            </button>
+                            <button class="ctl" id="next" aria-label="次の曲">
+                                <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg>
+                            </button>
+                        </div>
+                        <div class="timeline">
+                            <div class="rail" id="rail"><div class="fill" id="fill"></div></div>
+                            <div class="times"><span id="t-cur">00:00</span><span id="t-dur">00:00</span></div>
+                        </div>
+                        <ol class="tracklist" id="tracklist"></ol>
+                        <p class="follow-line">すべての楽曲は <a href="https://suno.com/@namakel" target="_blank" rel="noopener noreferrer">SUNO</a> で公開中</p>
                     </div>
                 </div>
             </div>
-            <div class="onboarding-actions">
-                <button id="onboard-choose-cool" class="onboard-btn onboard-cool">
-                    <svg class="onboard-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M3 7l4-4h10l4 4-9 14-9-14z"/>
-                        <path d="M3 7h18"/>
-                        <path d="M7 7l5 14"/>
-                        <path d="M17 7l-5 14"/>
-                    </svg>
-                    ＣＯＯＬ
-                </button>
-                <button id="onboard-choose-cute" class="onboard-btn onboard-cute">
-                    <svg class="onboard-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M20.8 4.6a5 5 0 0 0-7.1 0L12 6.3l-1.7-1.7a5 5 0 1 0-7.1 7.1l1.7 1.7L12 21l7.1-7.6 1.7-1.7a5 5 0 0 0 0-7.1z"/>
-                    </svg>
-                    ＣＵＴＥ
-                </button>
-            </div>
-            <button id="onboard-skip" class="onboard-skip">あとで</button>
-        </div>
-    </div>
+        </section>
 
-    <div id="loading-screen">
-        <div class="loader-content">
-            <div class="combined-loader-container">
-                <div class="loading-text">NOW LOADING<span>.</span><span>.</span><span>.</span></div>
-                <div class="cssload-loader">
-                    <div class="cssload-inner cssload-one"></div>
-                    <div class="cssload-inner cssload-two"></div>
-                    <div class="cssload-inner cssload-three"></div>
+        <!-- GALLERY -->
+        <section id="gallery">
+            <div class="wrap">
+                <div class="sec-head reveal">
+                    <p class="eyebrow">VISUAL</p>
+                    <h2 class="grad-text">GALLERY</h2>
+                </div>
+                <div class="gallery reveal" id="gallery-grid"></div>
+            </div>
+        </section>
+
+        <!-- LINKS -->
+        <section id="links">
+            <div class="wrap">
+                <div class="sec-head reveal">
+                    <p class="eyebrow">FOLLOW US</p>
+                    <h2 class="grad-text">LINKS</h2>
+                </div>
+                <div class="links-grid2 reveal">
+                    <a class="link-card" href="https://suno.com/@namakel" target="_blank" rel="noopener noreferrer">
+                        <span class="lp grad-text">SUNO</span><span class="arrow">↗</span>
+                    </a>
+                    <a class="link-card" href="https://www.youtube.com/@dj-konga" target="_blank" rel="noopener noreferrer">
+                        <span class="lp grad-text">YOUTUBE</span><span class="arrow">↗</span>
+                    </a>
+                    <a class="link-card" href="https://www.tiktok.com/@chainf1ow?_t=ZS-8zvSoO8hpVI&amp;_r=1" target="_blank" rel="noopener noreferrer">
+                        <span class="lp grad-text">TIKTOK</span><span class="arrow">↗</span>
+                    </a>
+                    <div class="link-card soon" aria-disabled="true">
+                        <span class="lp">SPOTIFY</span><span class="arrow">COMING SOON</span>
+                    </div>
+                    <div class="link-card soon" aria-disabled="true">
+                        <span class="lp">APPLE MUSIC</span><span class="arrow">COMING SOON</span>
+                    </div>
                 </div>
             </div>
-            <div class="progress-container">
-                <div class="progress-bar-container">
-                    <div class="progress-bar" id="progress-bar"></div>
-                </div>
-                <div class="loading-percentage" id="loading-percentage">0%</div>
-            </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
+    <footer>
+        <p class="f-logo grad-text">ChainFlow</p>
+        <p>AI MUSIC UNIT — PRODUCED BY NAMAKEL</p>
+    </footer>
 
+    <audio id="audio" preload="none"></audio>
 
-    <canvas id="particle-canvas"></canvas>
-    <div id="theme-morph" class="theme-morph" aria-hidden="true"></div>
-    <div id="music-notes-container"></div>
-    <div id="zoom-container"></div>
+    <script>
+    (() => {
+        'use strict';
+        const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    <div id="text-display-area">
-        <div id="text-content"></div>
-    </div>
+        /* ---------- Theme data ---------- */
+        const DATA = {
+            cool: {
+                tagline: 'AI時代のバーチャルミュージシャン',
+                about: 'DAO発のキャラクタープロジェクト「クリプトニンジャ」から誕生し、プロデューサー namakel の手で磨き上げられた、AI時代のバーチャルミュージシャン。',
+                aboutClose: '変幻する歌声、AIが紡ぐアレンジとメロディ。<br>その重なりが描く未来を、あなたも目撃してほしい。',
+                members: ['ビートで鼓動を打つ', '艶やかな息遣いで夜を染める', '深みと余韻を刻む'],
+                heroArt: 'chainflow/artist1.jpg',
+                cover: 'assets/playlists/cool.jpg',
+                gallery: ['chainflow/media1.jpg','chainflow/media2.jpg','chainflow/media3.jpg','chainflow/media4.jpg','chainflow/media5.jpg'],
+                particle: 'rgba(252, 246, 186, 0.35)',
+                themeColor: '#0B0D10',
+                playlist: [
+                    { title: 'BlueMoon', file: 'works-cool/BlueMoon.mp3' },
+                    { title: 'ChainFlow', file: 'works-cool/ChainFlow.mp3' },
+                    { title: 'Fragments of…', file: 'works-cool/Fragments of….mp3' },
+                    { title: 'Inspect Before …', file: 'works-cool/Inspect Before … .mp3' },
+                    { title: 'Lilith’s Shadow', file: 'works-cool/Lilith’s Shadow .mp3' },
+                    { title: 'still', file: 'works-cool/still.mp3' },
+                    { title: 'Sync Now', file: 'works-cool/Sync Now.mp3' },
+                    { title: 'what if', file: 'works-cool/what if.mp3' }
+                ]
+            },
+            cute: {
+                tagline: '世界へドキドキを届けるAIミュージックユニット',
+                about: '「クリプトニンジャ」プロジェクトを起点とし、プロデューサーnamakelと共に世界へドキドキを届けるAIミュージックユニット',
+                aboutClose: 'AIの魔法によって、万華鏡のように変化する歌声とメロディ。<br>幕を開けたばかりの未来を、共に楽しもう。',
+                members: ['わくわくさせるビートを刻む', 'キラキラと夢色の歌声を放つ', '心に寄り添うリリックを紡ぐ'],
+                heroArt: 'chainflow/artist2.jpg',
+                cover: 'assets/playlists/cute.jpg',
+                gallery: ['chainflow/media6.jpg','chainflow/media7.jpg','chainflow/media8.jpg','chainflow/media9.jpg','chainflow/media10.jpg'],
+                particle: 'rgba(213, 109, 122, 0.45)',
+                themeColor: '#FFF5F6',
+                playlist: [
+                    { title: 'alt account', file: 'works-cute/alt account .mp3' },
+                    { title: 'Bittersweet Times', file: 'works-cute/Bittersweet Times.mp3' },
+                    { title: 'BUGしてる', file: 'works-cute/BUGしてる.mp3' },
+                    { title: 'Rhythm Eclipse', file: 'works-cute/Rhythm Eclipse.mp3' },
+                    { title: 'Show me', file: 'works-cute/Show me.mp3' },
+                    { title: 'ピエタの残響', file: 'works-cute/ピエタの残響.mp3' }
+                ]
+            }
+        };
 
-    <main id="scroll-container" class="relative z-10"></main>
+        let theme = localStorage.getItem('cfTheme');
+        if (theme !== 'cool' && theme !== 'cute') {
+            theme = (localStorage.getItem('theme') === 'cute') ? 'cute' : 'cool';
+        }
 
-    <div id="page-indicator">
-        <span id="current-page" class="current-page primary-gradient-text">01</span>
-        <span id="total-pages" class="total-pages">/ 10</span>
-    </div>
+        /* ---------- Player ---------- */
+        const audio = document.getElementById('audio');
+        const els = {
+            cover: document.getElementById('cover'),
+            nowTitle: document.getElementById('now-title'),
+            play: document.getElementById('play'),
+            icPlay: document.getElementById('ic-play'),
+            icPause: document.getElementById('ic-pause'),
+            prev: document.getElementById('prev'),
+            next: document.getElementById('next'),
+            rail: document.getElementById('rail'),
+            fill: document.getElementById('fill'),
+            tCur: document.getElementById('t-cur'),
+            tDur: document.getElementById('t-dur'),
+            list: document.getElementById('tracklist')
+        };
+        let idx = 0;
+        let playing = false;
+        let loaded = false;
 
-    <button id="scroll-button">
-        <div id="scroll-button-icon"></div>
-    </button>
+        const fmt = (s) => {
+            if (!isFinite(s)) return '00:00';
+            const m = Math.floor(s / 60), ss = Math.floor(s % 60);
+            return String(m).padStart(2, '0') + ':' + String(ss).padStart(2, '0');
+        };
+        const playlist = () => DATA[theme].playlist;
 
-    <div id="bottom-fade"></div>
+        function renderList() {
+            els.list.innerHTML = playlist().map((t, i) => `
+                <li class="track${i === idx ? ' on' : ''}${i === idx && playing ? ' playing' : ''}" data-i="${i}">
+                    <span class="no">${i + 1}</span>
+                    <span class="t-title">${t.title}</span>
+                    <span class="eq"><i></i><i></i><i></i></span>
+                </li>`).join('');
+        }
+        function syncUI() {
+            els.nowTitle.textContent = playlist()[idx] ? playlist()[idx].title : '—';
+            els.icPlay.style.display = playing ? 'none' : 'block';
+            els.icPause.style.display = playing ? 'block' : 'none';
+            els.cover.classList.toggle('spin', playing && !reduceMotion);
+            renderList();
+        }
+        function load(i, autoplay) {
+            idx = (i + playlist().length) % playlist().length;
+            audio.src = encodeURI(playlist()[idx].file);
+            loaded = true;
+            if (autoplay) play();
+            syncUI();
+        }
+        function play() {
+            if (!loaded) { load(idx, false); }
+            audio.play().then(() => { playing = true; syncUI(); }).catch(() => {});
+        }
+        function pause() { audio.pause(); playing = false; syncUI(); }
 
-    <div id="ending-curtain">
-        <div class="ending-logo primary-gradient-text">ChainFlow</div>
-        <div class="ending-message">Thank you for watching</div>
-    </div>
+        els.play.addEventListener('click', () => (playing ? pause() : play()));
+        els.prev.addEventListener('click', () => load(idx - 1, true));
+        els.next.addEventListener('click', () => load(idx + 1, true));
+        els.list.addEventListener('click', (e) => {
+            const li = e.target.closest('.track');
+            if (!li) return;
+            const i = parseInt(li.dataset.i, 10);
+            if (i === idx && loaded) { playing ? pause() : play(); } else { load(i, true); }
+        });
+        audio.addEventListener('timeupdate', () => {
+            const p = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+            els.fill.style.inset = `0 ${100 - p}% 0 0`;
+            els.tCur.textContent = fmt(audio.currentTime);
+        });
+        audio.addEventListener('loadedmetadata', () => { els.tDur.textContent = fmt(audio.duration); });
+        audio.addEventListener('ended', () => load(idx + 1, true));
+        els.rail.addEventListener('click', (e) => {
+            if (!audio.duration) return;
+            const r = els.rail.getBoundingClientRect();
+            audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
+        });
 
-    <div id="persistent-player" class="persistent-player">
-        <button id="dismiss-player-btn" class="dismiss-player-btn" aria-label="プレイヤーを閉じる" title="閉じる">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#primary-gradient-svg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-            </svg>
-        </button>
-        <div class="persistent-player-content">
-            <img src="chainflow/artist1.jpg" alt="ChainFlow アルバムアート" class="album-art-persistent" onerror="this.onerror=null;this.src='https://placehold.co/60x60/1a1a2e/e0e0e0?text=Art';">
-            <div class="track-info-persistent">
-                <h4 class="title-persistent">No Music Playing</h4>
-                <p class="artist-persistent"></p>
-            </div>
-            <div class="controls-persistent-main">
-                <button class="control-btn-persistent" id="prev-track-persistent">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>
-                </button>
-                <div class="play-btn-persistent" id="play-pause-persistent">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="play-icon-persistent"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="pause-icon-persistent" style="display: none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                </div>
-                <button class="control-btn-persistent" id="next-track-persistent">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg>
-                </button>
-            </div>
-            <div class="time-and-volume-persistent">
-                <div class="time-display-persistent">
-                    <span id="current-time-persistent">00:00</span>
-                    <span>/</span>
-                    <span id="total-duration-persistent">00:00</span>
-                </div>
-                <div class="volume-control-persistent">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                    <input type="range" id="volume-slider-persistent" min="0" max="1" step="0.01" value="0.75" class="volume-slider">
-                </div>
-            </div>
-        </div>
-        <div id="progress-container-persistent" class="progress-bar-container-persistent">
-            <div class="progress-bar-persistent"></div>
-        </div>
-    </div>
-    <audio id="audio-player" style="display:none;"></audio>
-    <script src="https://cdn.jsdelivr.net/npm/music-metadata-browser/dist/music-metadata-browser.min.js" defer></script>
-    <script src="script.js"></script>
+        /* ---------- Theme ---------- */
+        const heroArt = document.getElementById('hero-art');
+        const galleryGrid = document.getElementById('gallery-grid');
+        const btnCool = document.getElementById('btn-cool');
+        const btnCute = document.getElementById('btn-cute');
+
+        function applyTheme(next, isFirst) {
+            theme = next;
+            const d = DATA[theme];
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('cfTheme', theme);
+            const tc = document.querySelector('meta[name="theme-color"]');
+            if (tc) tc.setAttribute('content', d.themeColor);
+
+            document.getElementById('hero-tagline').textContent = d.tagline;
+            document.getElementById('about-copy').textContent = d.about;
+            document.getElementById('about-close').innerHTML = d.aboutClose;
+            ['m1-desc', 'm2-desc', 'm3-desc'].forEach((id, i) => {
+                document.getElementById(id).textContent = d.members[i];
+            });
+            heroArt.style.backgroundImage = `url('${d.heroArt}')`;
+            els.cover.src = d.cover;
+            galleryGrid.innerHTML = d.gallery.map(src =>
+                `<figure><img src="${src}" alt="ChainFlow アートワーク" loading="lazy" onerror="this.closest('figure').style.display='none'"></figure>`
+            ).join('');
+            btnCool.classList.toggle('on', theme === 'cool');
+            btnCute.classList.toggle('on', theme === 'cute');
+            btnCool.setAttribute('aria-selected', theme === 'cool');
+            btnCute.setAttribute('aria-selected', theme === 'cute');
+
+            if (!isFirst) { pause(); audio.removeAttribute('src'); loaded = false; }
+            idx = 0;
+            els.tDur.textContent = '00:00';
+            els.tCur.textContent = '00:00';
+            els.fill.style.inset = '0 100% 0 0';
+            syncUI();
+        }
+        btnCool.addEventListener('click', () => theme !== 'cool' && applyTheme('cool'));
+        btnCute.addEventListener('click', () => theme !== 'cute' && applyTheme('cute'));
+        applyTheme(theme, true);
+
+        /* ---------- Reveal on scroll ---------- */
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+        }, { threshold: 0.12 });
+        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+        /* ---------- Ambient particles ---------- */
+        const cv = document.getElementById('fx');
+        if (!reduceMotion && cv) {
+            const cx = cv.getContext('2d');
+            let W, H, dots = [];
+            const resize = () => {
+                W = cv.width = window.innerWidth;
+                H = cv.height = window.innerHeight;
+            };
+            const seed = () => {
+                dots = Array.from({ length: 42 }, () => ({
+                    x: Math.random() * W, y: Math.random() * H,
+                    r: Math.random() * 1.6 + 0.4,
+                    vx: (Math.random() - 0.5) * 0.18,
+                    vy: (Math.random() - 0.5) * 0.18
+                }));
+            };
+            resize(); seed();
+            window.addEventListener('resize', () => { resize(); seed(); });
+            (function tick() {
+                cx.clearRect(0, 0, W, H);
+                cx.fillStyle = DATA[theme].particle;
+                dots.forEach(p => {
+                    p.x += p.vx; p.y += p.vy;
+                    if (p.x < 0 || p.x > W) p.vx *= -1;
+                    if (p.y < 0 || p.y > H) p.vy *= -1;
+                    cx.beginPath();
+                    cx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    cx.fill();
+                });
+                requestAnimationFrame(tick);
+            })();
+        }
+    })();
+    </script>
 </body>
 </html>
